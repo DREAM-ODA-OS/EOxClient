@@ -14,6 +14,7 @@
 		'controller/DownloadController',
 		'controller/SelectionManagerController',
         'controller/IngestionAdminT5Controller',
+        'controller/IngestionAdminT6Controller',
 		'router'
 	],
 
