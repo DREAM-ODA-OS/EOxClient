@@ -15,6 +15,7 @@
 		'controller/SelectionManagerController',
         'controller/IngestionAdminT5Controller',
         'controller/IngestionAdminT6Controller',
+        'controller/OrthoQualityController',
 		'router'
 	],
 
