@@ -25,7 +25,7 @@
 	        this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
 	        this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
 	        this.listenTo(Communicator.mediator, "dialog:open:download", this.onDownloadToolOpen);
-	        this.listenTo(Communicator.mediator, "dialog:open:downloadSelection", this.onDwonloadSelectionOpen);
+	        this.listenTo(Communicator.mediator, "dialog:open:downloadSelection", this.onDownloadSelectionOpen);
 
 	        this.view = new ds.DownloadSelectionView({model:this.model});
 		},
@@ -78,7 +78,7 @@
             }
         },
 
-		onDwonloadSelectionOpen: function (event) {
+		onDownloadSelectionOpen: function (event) {
 			if (_.isUndefined(this.view.isClosed) || this.view.isClosed) {	
 				App.viewContent.show(this.view);
 			}else{
