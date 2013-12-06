@@ -180,7 +180,7 @@
 				// Create map view and execute show of its region
 				this.map.show(new v.MapView({el: $("#map")}));
 
-				// If Navigation Bar is set in configuration go trhough the
+				// If Navigation Bar is set in configuration go through the
 				// defined elements creating a item collection to rendered
 				// by the marionette collection view
 				if (config.navBarConfig) {
