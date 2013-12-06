@@ -139,7 +139,7 @@
       },
       {
         "name" : "Ingestion",
-        "eventToRaise" : "dialog:open:about"
+        "eventToRaise" : "dialog:open:ingestionAdminT5"
       },
       {
         "name" : "Quality",
