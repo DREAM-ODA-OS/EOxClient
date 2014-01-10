@@ -103,10 +103,10 @@ The browser view refreshes itself automatically reflecting the code changes made
     Update the apt sources: 
 
     ```
-    sudo apt-get upadte 
+    sudo apt-get update 
     ```
 
-    And finally install the Node.JS 
+    And finally install the Node.JS:
 
     ```
     sudo apt-get install nodejs
@@ -117,7 +117,7 @@ The browser view refreshes itself automatically reflecting the code changes made
     Run following commands: 
 
     ```
-    sudo apt-get install ruby  rubygems
+    sudo apt-get install ruby rubygems
     gem install compass
     ```
 
