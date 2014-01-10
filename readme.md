@@ -32,7 +32,7 @@ The application uses [Yeoman](http://yeoman.io/) which integrates:
     git clone https://github.com/DREAM-ODA-OS/ODAClient.git
     ```
 
-0.  Install development enviroment: 
+0.  Install development enviroment:
 
     Make sure [Node.js](http://nodejs.org) and [NPM](https://npmjs.org) are installed
     on your machine and run:
@@ -62,7 +62,7 @@ The application uses [Yeoman](http://yeoman.io/) which integrates:
     grunt server 
     ```
 
-    and point your browser of port 9000 of your computer. 
+    and point your browser to port 9000 of the machine where the grunt is running.  
 
 If you managed to reach this the last step you can start to hack the code. 
 The browser view refreshes itself automatically reflecting the code changes made. 
@@ -82,3 +82,84 @@ The browser view refreshes itself automatically reflecting the code changes made
 
 0.  Put the content of the deployment package to your server and make sure
     the web server can access the `index.html` file. 
+
+## Setting up the development environment on Ubuntu 12.4 
+
+0.  Setup PPA repository to get latest Node.js: 
+
+    Copy following lines to `/etc/apt/sources.list` 
+
+    ```
+    deb http://ppa.launchpad.net/chris-lea/node.js/ubuntu precise main 
+    deb-src http://ppa.launchpad.net/chris-lea/node.js/ubuntu precise main 
+    ```
+
+    Add PPA keys: 
+
+    ```
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C7917B12
+    ```
+
+    Update the apt sources: 
+
+    ```
+    sudo apt-get upadte 
+    ```
+
+    And finally install the Node.JS 
+
+    ```
+    sudo apt-get install nodejs
+    ```
+
+0.  Install Ruby, Ruby Gems and Compass 
+
+    Run following commands: 
+
+    ```
+    sudo apt-get install ruby  rubygems
+    gem install compass
+    ```
+
+0.  Install global Node.JS components: 
+
+    ```
+    sudo npm install -g grunt-cli
+    sudo npm install -g bower 
+    ```
+
+0.  Get the code from GitHub [DREAM Client repository](https://github.com/DREAM-ODA-OS/ODAClient):
+
+    ```
+    git clone git@github.com:DREAM-ODA-OS/ODAClient.git
+    ```
+
+    or
+
+    ```
+    git clone https://github.com/DREAM-ODA-OS/ODAClient.git
+    ```
+
+0.  Install development enviroment:
+
+    ```
+    cd ./ODAClient
+    npm install 
+    npm install grunt-svgmin
+    ```
+    
+0.  Install client dependencies:  
+
+    The required JavaScript frameworks can be installed by: 
+
+    ```
+    bower install
+    ```
+
+0.  Start the [Grunt](http://gruntjs.com/) development server:
+
+    ```
+    grunt server 
+    ```
+
+    and point your browser to port 9000 of the machine where the grunt is running.  
