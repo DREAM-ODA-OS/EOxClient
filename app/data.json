@@ -2,6 +2,44 @@
 
   "products": [
       {
+        "name": "Spot 4 - Take 5 - L1C",
+        "visible": false,
+        "timeSlider": true,
+        "color":"#429bc9",
+        "view": {
+          "id": "Spot4Take5_N1C_RGB_view",
+          "protocol": "WMS",
+          "urls": [
+              "http://data.eox.at/instance00/ows"
+          ],
+          "style": "default"
+        },
+        "download": {
+          "id": "Spot4Take5_N1C",
+          "protocol": "EOWCS",
+          "url": "http://data.eox.at/instance00/ows"
+        }
+      },
+      {
+        "name": "Spot 4 - Take 5 - L2A (pente)",
+        "visible": false,
+        "timeSlider": true,
+        "color":"#f4a720",
+        "view": {
+          "id": "Spot4Take5_N2A_RGB_view",
+          "protocol": "WMS",
+          "urls": [
+              "http://data.eox.at/instance00/ows"
+          ],
+          "style": "default"
+        },
+        "download": {
+          "id": "Spot4Take5_N2A_PENTE",
+          "protocol": "EOWCS",
+          "url": "http://data.eox.at/instance00/ows"
+        }
+      },
+      {
         "name": "CESBIO Landsat 5",
         "visible": false,
         "timeSlider": true,
