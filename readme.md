@@ -55,6 +55,15 @@ The application uses [Yeoman](http://yeoman.io/) which integrates:
     ```
     bower install
     ```
+0.  To use the Ingestion Admin T5 component, you'll need have the T5 ingestion engine
+    intalled and running before you start the ODAClient.
+
+    Get the T5 Ingestion Engine from `https://github.com/DREAM-ODA-OS/IngestionEngine`
+    and install according to the README.md there.  The git clone url is:
+
+    ```
+    https://github.com/DREAM-ODA-OS/IngestionEngine.git
+    ```
 
 0.  Start the [Grunt](http://gruntjs.com/) development server:
 
