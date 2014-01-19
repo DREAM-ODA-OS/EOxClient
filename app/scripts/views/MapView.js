@@ -12,6 +12,9 @@ define(['backbone',
 			var MapView = Backbone.View.extend({
 				
 				onShow: function() {
+                    },
+                /*
+				onShow: function() {
 					this.map = new OpenLayers.Map({div: "map", fallThrough: true});
 					console.log("Created Map");
 
@@ -95,6 +98,8 @@ define(['backbone',
 				    this.map.setCenter(new OpenLayers.LonLat(mapmodel.get("center")), mapmodel.get("zoom") );
 				    return this;
 				},
+                */
+
 				//method to create layer depending on protocol
 				//setting possible description attributes
 				createLayer: function (layerdesc) {

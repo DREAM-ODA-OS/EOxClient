@@ -6,15 +6,20 @@
 
     root.define(
         
-        ['backbone','communicator'],
+        ['backbone','communicator', 'text!../../config.json'],
 
-        function( Backbone, Communicator ) 
+        function( Backbone, Communicator, Config )
         {
+            var config_src = JSON.parse(Config);
+            var url_src =
+                config_src.ingestionEngineT5.baseUrl +
+                config_src.ingestionEngineT5.listScenario;
             var IngestionAdminT5Model = Backbone.Model.extend(
                 {
-                    ToI:{},         // Time of Interest
-                    AoI:[],         // Area of Interest
-                    products: {}    // Selected products
+                    url: url_src,
+                    ToI:{},          // Time of Interest
+                    AoI:[],          // Area of Interest
+                    scenarios: []    // Defined Scenarios
                 }
             );
 

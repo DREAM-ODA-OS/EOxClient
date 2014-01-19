@@ -25,16 +25,20 @@
 
                 initialize: function(options)
                 {
-                    // model initialization: 
-
-                    this.model.set('products', {});
+                    // model initialization:
+                    this.model.fetch( {
+                            error:function(m,r,o){
+                                console.log("fetch error:\n"+r);
+                                for  (var i in r) {
+                                    console.log(i+" : "+r[i]);
+                                }
+                            }
+                        });
 
                     // register events the component is listenning to: 
 
-                    //this.listenTo(Communicator.mediator, "map:layer:change", this.onChangeLayer);
                     //this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
                     //this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
-                    //this.listenTo(Communicator.mediator, "dialog:open:download", this.onDownloadToolOpen);
                     this.listenTo(Communicator.mediator, "dialog:open:ingestionAdminT5", this.onIngestionAdminOpen);
             
                     // instantiate component's view
@@ -43,22 +47,32 @@
 
                 // event handlers ...
 
-    /*
-                onChangeLayer: function (options) {
-                    if (!options.isBaseLayer){
-                        var layer = globals.products.find(function(model) { return model.get('name') == options.name; });
-                        if (layer) { // Layer will be empty if it is an overlay layer
-                            var products = this.model.get('products');
-                            if(options.visible){
-                                products[layer.get('download').id] = layer;    
-                            }else{
-                                delete products[layer.get('download').id];
-                            }
-                            this.model.set('products', products);
-                        }
-                    }
+                onScenarioListDone: function (data, textStatus, req) {
+                    console.log("onScenarioListSuccess");
                 },
-    */
+                
+                onScenarioListError: function (data, textStatus, errorThrown) {
+                    console.log("onScenarioListError: " + textStatus);
+                    console.log(data.getAllResponseHeaders());
+                },
+
+                onScenarioListComplete: function ( data, textStatus, errorThrown) {
+                    console.log("onScenarioListComplete:");
+                    console.log(data);
+                    var scenarios;
+                    if (textStatus) {
+                        console.log("Ajax request error: " + textStatus);
+                        console.log("status: " + data.status);
+                    }
+                    /*
+                    if (0==data.ie_status)
+                    {
+                        scenarios = data.scenarios;
+                        console.log(scenarios);
+                    }
+                    */
+                },
+               
     /*
                 onTimeChange: function(time) {
                     this.model.set('ToI',time);
@@ -72,27 +86,6 @@
                       }
                     }else{
                       this.model.set('AoI', null);
-                    }
-                },
-    */
-    /*
-                checkDownload: function() {
-                    // Check that all necessary selections are available
-                    if(this.model.get('ToI') != null &&
-                       this.model.get('AoI') != null &&
-                       _.size(this.model.get('products')) > 0){
-                      Communicator.mediator.trigger('selection:enabled', {id:"download", enabled:true} );
-                    }else{
-                      Communicator.mediator.trigger('selection:enabled', {id:"download", enabled:false} );
-                    }
-                  },
-    */
-    /*
-                onDownloadToolOpen: function(toOpen) {
-                    if(toOpen){
-                      App.viewContent.show(new v.DownloadView({model:this.model}));
-                    }else{
-                      App.viewContent.close();
                     }
                 },
     */

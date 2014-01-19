@@ -14,6 +14,7 @@
 		'controller/DownloadController',
 		'controller/SelectionManagerController',
         'controller/IngestionAdminT5Controller',
+        'controller/AddLocalProductController',
         'controller/IngestionAdminT6Controller',
         'controller/OrthoQualityController',
 		'router'
@@ -33,6 +34,9 @@
 				var v = {}; //views
 				var m = {};	//models
 				var t = {};	//templates
+
+                // Ingestion Engine options
+				globals.objects.add('ingestionEngineT5', config.ingestionEngineT5);
 
 				// Application regions are loaded and added to the Marionette Application
 				_.each(config.regions, function(region) {

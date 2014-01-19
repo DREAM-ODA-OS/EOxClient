@@ -1,0 +1,75 @@
+<form id="iet5-frm-add-product" acction=http://127.0.0.1:8000/ingest/addOdaLocal/1 enctype="multipart/form-data" method="post">
+<div class="panel-heading">
+    <button type="button" class="close"><i class="fa fa-times-circle"></i></button>
+    <h3 class="panel-title"><i class="fa fa-fw fa-upload"></i><div id="sc_id"></div></h3>
+</div>
+
+<div class="panel-body">
+
+  <div class="input-group" id="file-list" style="width:100%;">
+    <table>
+      <tr>
+        <td>Metadata file</td>
+        <td><input id="metadataFile" type="file"/></td>
+      </tr>
+      <tr>
+        <td>Raster file</td>
+        <td><input id="rasterFile" type="file"/></td>
+      </tr>
+      <tr>
+      </tr>
+    </table>
+  </div>
+</div>
+<div class="panel-footer">
+<button class="btn btn-block btn-primary" id="btn-download" type="submit"><i class="icon-white"></i>Upload product</button>
+<!-- <td><input type="submit" value="Upload product"/></td> -->
+</div>
+</form>
+<script>
+
+function SendForm()
+{
+    var form = document.getElementById("iet5-frm-add-product");
+    var formData = new FormData(form);
+
+    var addr="http://127.0.0.1:8000/ingest/addOdaLocal/1"
+
+
+    console.log(form.id);
+    console.log(form.action);
+    console.log(formData);
+
+/*
+    var xmlHttpRequest = new XMLHttpRequest();
+    console.log("new XMLHttpRequest()");
+    xmlHttpRequest.open("POST", form.action,true);
+    console.log("xmlHttpRequest.open()");
+    xmlHttpRequest.send(formData);
+    console.log("xmlHttpRequest.send()");
+*/
+
+var foo =  $.ajax({
+        url: addr,  //Server script to process data
+        type: 'POST',
+        xhr: function() {  // Custom XMLHttpRequest
+            var myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload){ // Check if upload property exists
+                myXhr.upload.addEventListener('progress',progressHandlingFunction, false); // For handling the progress of the upload
+            }
+            return myXhr;
+        },
+        //Ajax events
+  /*      beforeSend: beforeSendHandler,
+        success: completeHandler,*/
+        error: function(err){ console.log("ERROR: " + err); },
+        // Form data
+        data: formData,
+        //Options to tell jQuery not to process data or worry about content-type.
+        cache: false,
+        contentType: false,
+        processData: false
+    });
+}
+
+</script>
