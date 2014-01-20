@@ -45,7 +45,7 @@ The application uses [Yeoman](http://yeoman.io/) which integrates:
     ```
 
     These commands install the needed Node.js packages. In case of any trouble try to use 
-    reasonable recent version of Node.js. Also note that newer versions of Node.js contain 
+    a reasonably recent version of Node.js. Also note that newer versions of Node.js contain 
     the NPM already bundled in the baseline installation. 
 
 0.  Install client dependencies:  
@@ -75,7 +75,7 @@ The application uses [Yeoman](http://yeoman.io/) which integrates:
     git clone https://github.com/DREAM-ODA-OS/IngestionEngine.git
     ```
     
-   Then configure according the toIngestion Engine's  README.md.
+   Then configure according the to Ingestion Engine's README.
 
 0.  Start the [Grunt](http://gruntjs.com/) development server:
 
