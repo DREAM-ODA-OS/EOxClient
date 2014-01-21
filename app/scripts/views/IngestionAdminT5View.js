@@ -232,7 +232,7 @@
 
                     this.$('.close').on("click", _.bind(this.onClose, this));
 
-                    this.$('#btn-iet5-test').on("click",  _.bind(this.onTest, this))
+                    // this.$('#btn-iet5-test').on("click",  _.bind(this.onTest, this))
                     this.$('#btn-iet5-addscenario').on("click",  _.bind(this.onAddScenario, this));
 
                     this.updater.i = setInterval(_.bind(function() {

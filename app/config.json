@@ -3,14 +3,14 @@
   "debug":true,
 
   "ingestionEngineT5": {
-    "baseUrl"         : "http://localhost:8000/",
-    "listScenario"    : "ingest/ManageScenario/ajaxListScenarios",
-    "editScenario"    : "scenario/odaedit/",
-    "addLocalProduct" : "ingest/odaAddLocal/",
-    "deleteScenario"  : "scenario/odadelete/",
-    "ingestScenario"  : "ingestion/odaingest/",
-    "stopScenario"    : "ingestion/odastop/",
-    "addScenario"     : "scenario/odaadd/"
+    "baseUrl"         : "http://localhost:8000/ingest/ManageScenario/",
+    "listScenario"    : "odaListScenarios",
+    "editScenario"    : "odaedit/",
+    "addLocalProduct" : "odaAddLocal/",
+    "deleteScenario"  : "odadelete/",
+    "ingestScenario"  : "odaingest/",
+    "stopScenario"    : "odastop/",
+    "addScenario"     : "odaadd/"
   },
 
   "mapConfig": {
