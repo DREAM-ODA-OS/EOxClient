@@ -26,7 +26,7 @@ The application uses [Yeoman](http://yeoman.io/) which integrates:
     git clone git@github.com:DREAM-ODA-OS/ODAClient.git
     ```
 
-    or
+    or, just for inspecting the code without the possibility to push changes back to github:
 
     ```
     git clone https://github.com/DREAM-ODA-OS/ODAClient.git
