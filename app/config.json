@@ -4,7 +4,7 @@
 
   "ingestionEngineT5": {
     "baseUrl"         : "http://localhost:8000/ingest/ManageScenario/",
-    "listScenario"    : "odaListScenarios",
+    "listScenario"    : "odaListScenarios/",
     "editScenario"    : "odaedit/",
     "addLocalProduct" : "odaAddLocal/",
     "deleteScenario"  : "odadelete/",

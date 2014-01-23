@@ -109,13 +109,13 @@
 
                             // id and name
                             '<td width=10% title="Scenario Id">' + ncn_id + '</td>' +
-                            '<td colspan=2 title="Scenario Name">' + scenarios[i].name + '</td>' +
+                            '<td colspan=2 title="Scenario Name">' + scenarios[i].scenario_name + '</td>' +
                             '</tr>' +
                             '<tr>' +
                             //                            '<td></td>' +
 
                             // description text accross all columns
-                            '<td colspan=3 title="Description">' + scenarios[i].decription + '</td>' +
+                            '<td colspan=3 title="Description">' + scenarios[i].scenario_description + '</td>' +
                             '</tr>' +
                             '<tr>' +
                             // '<td></td>' +
