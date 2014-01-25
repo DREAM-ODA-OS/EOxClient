@@ -10,7 +10,8 @@
     "deleteScenario"  : "odadelete/",
     "ingestScenario"  : "odaingest/",
     "stopScenario"    : "odastop/",
-    "addScenario"     : "odaadd/"
+    "addScenario"     : "odaadd/",
+    "showLog"         : "odashowlog/"
   },
 
   "mapConfig": {

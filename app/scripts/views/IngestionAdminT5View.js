@@ -233,7 +233,8 @@
                     this.$('.close').on("click", _.bind(this.onClose, this));
 
                     // this.$('#btn-iet5-test').on("click",  _.bind(this.onTest, this))
-                    this.$('#btn-iet5-addscenario').on("click",  _.bind(this.onAddScenario, this));
+                    this.$('#btn-iet5-addscenario').on("click", _.bind(this.onAddScenario, this));
+                    this.$('#btn-iet5-showlog').on("click",     _.bind(this.onShowLog,     this));
 
                     this.updater.i = setInterval(_.bind(function() {
                                 this.model.fetch();
@@ -257,23 +258,9 @@
                     var ie_options = globals.objects.get('ingestionEngineT5');
                     return ie_options['baseUrl'] + ie_options[op];
                 },
-
-                onAddLocalProduct: function (sc_id, ncn_id)
-                {
-                    /*
-                    console.log("onAddLocalProduct" + sc_id);
-       				globals.objects.add('curr_sc_id', sc_id);
-                    console.log("curr_sc_id" + globals.objects.get('curr_sc_id'));
-                    Communicator.mediator.trigger("dialog:open:add-local-product", true);
-                    */
-                    var url = this.getIngEngUrl( "addLocalProduct" );
-                    var w = window.open(url+ncn_id, 200, 200);
-                },
-
-                onEditScenario: function(ncn_id)
-                {
-                    var edit_url = this.getIngEngUrl( "editScenario" );
-                    var w = window.open(edit_url+ncn_id, 600, 600);
+                
+                openEditWindow: function(url) {
+                    var w = window.open(url, "", "width=850,height=700,scrollbars=1,resizable=1");
                     var iedit;
                     iedit = setInterval(_.bind(function() {
                                 if (this.k.closed) {
@@ -284,18 +271,34 @@
                         800);
                 },
 
+                onAddLocalProduct: function (sc_id, ncn_id)
+                {
+                    /*
+                    console.log("onAddLocalProduct" + sc_id);
+       				globals.objects.add('curr_sc_id', sc_id);
+                    console.log("curr_sc_id" + globals.objects.get('curr_sc_id'));
+                    Communicator.mediator.trigger("dialog:open:add-local-product", true);
+                    */
+                    var url = this.getIngEngUrl( "addLocalProduct" );
+                    var w = window.open(url+ncn_id, "Add Local Product" , "width=625,height=225,resizable=1");
+                },
+
+                onEditScenario: function(ncn_id)
+                {
+                    var edit_url = this.getIngEngUrl( "editScenario" );
+                    this.openEditWindow(edit_url+ncn_id);
+                },
+
                 onAddScenario: function()
                 {
                     var add_url = this.getIngEngUrl( 'addScenario' );
-                    var w = window.open(add_url, 600, 600);
-                    var iadd;
-                    iadd = setInterval(_.bind(function() {
-                                if (this.k.closed) {
-                                    this.m.fetch();
-                                    clearInterval(iadd);
-                                }
-                            }, {k:w, m: this.model }),
-                        800);
+                    this.openEditWindow(add_url);
+                },
+
+                onShowLog: function()
+                {
+                    var add_url = this.getIngEngUrl( 'showLog' );
+                    var w = window.open(add_url, "Ingestion Admin Log", "width=850,height=650,scrollbars=1,resizable=1");
                 },
 
                 onTimeChange: function (time)
