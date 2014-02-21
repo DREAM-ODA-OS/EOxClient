@@ -26,17 +26,15 @@
 				"change #txt-maxx" : "onBBoxChange",
 				"change #txt-miny" : "onBBoxChange",
 				"change #txt-maxy" : "onBBoxChange",
-				'changeDate': "onChangeDate"
+				"hide": "onCloseTimeWidget"
 			},
-
-			/*initialize: function  (model) {
-				this.times = model.get("ToI");
-			},		*/
-
+			
 			onShow: function (view) {
 
 				this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
 	        	this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
+
+	        	this.timeinterval = {};
 
 	        	this.delegateEvents(this.events);
 
@@ -47,7 +45,7 @@
 		    		handle: '.panel-heading'
 		    	});
 
-		    	this.$('#div-date-begin input[type="text"]').datepicker({autoclose: true, format: "dd/mm/yyyy"});
+		    	this.$('#div-date-begin input[type="text"]').datepicker({autoclose: true, format: "dd/mm/yyyy", keyboardNavigation: false});
 		    	this.$('#div-date-begin input[type="text"]').datepicker('update', this.model.get('ToI').start);
 		    	this.$('#div-date-begin input[type="text"]').datepicker('setDate', this.model.get('ToI').start);
 
@@ -88,7 +86,8 @@
 		    	this.$('#div-date-end input[type="text"]').datepicker('update', this.model.get('ToI').end);
 			},
 
-			onChangeDate: function (evt) {
+
+			onCloseTimeWidget: function(evt){
 				var opt = {
 					start: this.$('#div-date-begin input[type="text"]').datepicker('getDate'),
 					end: this.$('#div-date-end input[type="text"]').datepicker('getDate')
