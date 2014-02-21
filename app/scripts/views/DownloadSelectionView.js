@@ -38,6 +38,8 @@
 				this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
 	        	this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
 
+	        	this.delegateEvents(this.events);
+
 				this.$('.close').on("click", _.bind(this.onClose, this));
 				this.$el.draggable({ 
 		    		containment: "#content" ,
