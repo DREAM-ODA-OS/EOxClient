@@ -35,40 +35,38 @@
 		'communicator',
     	'globals',
 		'app',
-		'views/SelectionManagerView',
-    	'models/SelectionModel'
+		'jquery'
 	],
 
-	function( Backbone, Communicator, globals, App, v, m ) {
+	function( Backbone, Communicator, globals, App) {
 
-		var SelectionManagerController = Backbone.Marionette.Controller.extend({
-			model: new m.SelectionModel(),
+		var LoadingController = Backbone.Marionette.Controller.extend({
+			//model: new m.SelectionModel(),
+			progress_count : 0,
 
 	    initialize: function(options){
-	      	this.model.set('selections', []);
-	        this.listenTo(Communicator.mediator, "selection:changed:json", this.onSelectionChange);
-	        this.listenTo(Communicator.mediator, "ui:open:selectionManager", this.onSelectionManagerOpen);
+	        this.listenTo(Communicator.mediator, "progress:change", this.onProgressChange);
 		},
 
-	    onSelectionChange: function(selection) {
-	        if (selection != null) {
-	        	var selections = this.model.get('selections');
-	        	selections.push(selection);
-	            this.model.set('selections', selections);
-	        }else{
-	        	this.model.set('selections', []);
-	        }
+	    onProgressChange: function(start) {
+
+	    	if(start)
+	    		this.progress_count+=1;
+	    	else
+	    		this.progress_count-=1;
+
+
+	    	if (this.progress_count > 0) {
+	    		$("body").addClass("wait");
+	    	}else{
+	    		$("body").removeClass("wait");
+	    	}
+
 		},
 
-		onSelectionManagerOpen: function(toOpen) {
-            if(toOpen){
-              App.viewContent.show(new v.SelectionManagerView({model:this.model}));
-            }else{
-              App.viewContent.close();
-            }
-          }
 		});
-		return new SelectionManagerController();
+
+		return new LoadingController();
 	});
 
 }).call( this );

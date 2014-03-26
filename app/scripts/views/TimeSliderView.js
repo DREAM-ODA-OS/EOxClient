@@ -1,3 +1,30 @@
+//-------------------------------------------------------------------------------
+//
+// Project: EOxClient <https://github.com/EOX-A/EOxClient>
+// Authors: Daniel Santillan <daniel.santillan@eox.at>
+//
+//-------------------------------------------------------------------------------
+// Copyright (C) 2014 EOX IT Services GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies of this Software or works derived from this Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//-------------------------------------------------------------------------------
+
 (function() {
   'use strict';
   var root = this;
@@ -18,6 +45,7 @@
       },
       initialize: function(options){
         this.options = options;
+        this.active_products = [];
       },
 
       render: function(options){
@@ -27,11 +55,15 @@
 
         this.listenTo(Communicator.mediator, 'date:selection:change', this.onDateSelectionChange);
         this.listenTo(Communicator.mediator, "map:layer:change", this.changeLayer);
+        this.listenTo(Communicator.mediator, "map:position:change", this.updateExtent);
+        this.listenTo(Communicator.mediator, "date:selection:change", this.onDateSelectionChange);
 
         var selectionstart = new Date(this.options.brush.start);
         var selectionend = new Date(this.options.brush.end);
 
-        this.slider = new TimeSlider(this.el, {
+        this.activeWPSproducts = [];
+
+       this.slider = new TimeSlider(this.el, {
 
           domain: {
             start: new Date(this.options.domain.start),
@@ -41,11 +73,14 @@
             start: selectionstart,
             end: selectionend
           },
-          debounce: 200,
+          debounce: 300,
+          ticksize: 5,
 
           datasets: []
 
         });
+
+       this.slider.hide();
 
         Communicator.mediator.trigger('time:change', {start:selectionstart, end:selectionend});
       }, 
@@ -63,17 +98,79 @@
           var product = globals.products.find(function(model) { return model.get('name') == options.name; });
           if (product){
             if(options.visible && product.get('timeSlider')){
-              this.slider.addDataset(
-                {
-                  id: product.get('view').id,
-                  color: product.get('color'),
-                  data: new TimeSlider.Plugin.WMS({ url: product.get('view').urls[0], eoid: product.get('view').id, dataset: product.get('view').id })
-                }
-              );
+
+              switch (product.get("timeSliderProtocol")){
+                case "WMS":
+                  this.slider.addDataset({
+                    id: product.get('view').id,
+                    color: product.get('color'),
+                    data: new TimeSlider.Plugin.WMS({
+                      url: product.get('view').urls[0],
+                      eoid: product.get('view').id,
+                      dataset: product.get('view').id
+                    })
+                  });
+                  break;
+                case "EOWCS":
+                  this.slider.addDataset({
+                    id: product.get('download').id,
+                    color: product.get('color'),
+                    data: new TimeSlider.Plugin.EOWCS({
+                        url: product.get('download').url,
+                        eoid: product.get('download').id,
+                        dataset: product.get('download').id
+                     })
+                  });
+                  break;
+                case "WPS":
+                  var extent = Communicator.reqres.request('map:get:extent');
+                  this.slider.addDataset({
+                    id: product.get('view').id,
+                    color: product.get('color'),
+                    data: new TimeSlider.Plugin.WPS({
+                        url: product.get('download').url,
+                        eoid: product.get('download').id,
+                        dataset: product.get('view').id ,
+                        bbox: [extent.left, extent.bottom, extent.right, extent.top]
+                     })
+                  });
+                  this.activeWPSproducts.push(product.get('view').id);
+                  // For some reason updateBBox is needed, altough bbox it is initialized already.
+                  // Withouth this update the first time activating a layer after the first map move
+                  // the bbox doesnt seem to be defined in the timeslider library and the points shown are wrong
+                  this.slider.updateBBox([extent.left, extent.bottom, extent.right, extent.top], product.get('download').id);
+                  break;
+              }
+              this.active_products.push(product.get('view').id);
+              this.slider.show();
             }else{
               this.slider.removeDataset(product.get('view').id);
+              if (this.activeWPSproducts.indexOf(product.get('view').id)!=-1)
+                this.activeWPSproducts.splice(this.activeWPSproducts.indexOf(product.get('view').id), 1);
+
+              if (this.active_products.indexOf(product.get('view').id)!=-1)
+                this.active_products.splice(this.active_products.indexOf(product.get('view').id), 1);
+
+              if (this.active_products.length == 0)
+                this.slider.hide();
             }
           }
+        }
+      },
+
+      updateExtent: function(extent){
+        
+        for (var i=0; i<this.activeWPSproducts.length; i++){
+          console.log(this.activeWPSproducts[i]);
+          this.slider.updateBBox([extent.left, extent.bottom, extent.right, extent.top], this.activeWPSproducts[i]);
+        }
+      },
+
+      onCoverageSelected: function(evt){
+        if (evt.originalEvent.detail.bbox){
+          var bbox = evt.originalEvent.detail.bbox.replace(/[()]/g,'').split(',').map(parseFloat);
+          this.slider.select(evt.originalEvent.detail.start, evt.originalEvent.detail.end);
+          Communicator.mediator.trigger("map:set:extent", bbox);
         }
       }
 
