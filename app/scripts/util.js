@@ -20,7 +20,7 @@ var getISODateTimeString = function(date) {
   return getISODateString(date)
     + padLeft(String(date.getUTCHours()), "0", 2) + ":"
     + padLeft(String(date.getUTCMinutes()), "0", 2) + ":"
-    + padLeft(String(date.getUTCSeconds()), "0", 2) + "Z";
+    + padLeft(String(date.getUTCSeconds()), "0", 2) + ".000Z";
 };
 
 var htmlTemplate = function(selector, values) {
@@ -90,3 +90,13 @@ var getCoverageXML = function(coverageid, options) {
   params.push('</wcs:GetCoverage>');
   return params.join("");
 };
+
+var getConfigDataXML = function(startDatestr, endDatestr, bbox) {
+
+	AoIStr = String(bbox.left.toFixed(3))+','+String(bbox.bottom.toFixed(3))+','+String(bbox.right.toFixed(3))+','+String(bbox.top.toFixed(3))
+
+	return ConfigBatchStr = '<?xml version="1.0" encoding="UTF-8"?><sar:EarthObservation xmlns:sar="http://www.opengis.net/sar/2.1" xmlns:gml="http://www.opengis.net/gml/3.2" ><gml:Geographic><gml:box>'+AoIStr+'</gml:box></gml:Geographic><gml:TimePeriod><gml:beginPosition>'+startDatestr+'</gml:beginPosition><gml:endPosition>'+endDatestr+'</gml:endPosition></gml:TimePeriod></sar:EarthObservation>';
+
+};
+
+

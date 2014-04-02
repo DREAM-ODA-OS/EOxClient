@@ -17,6 +17,7 @@
         'controller/AddLocalProductController',
         'controller/IngestionAdminT6Controller',
         'controller/OrthoQualityController',
+		'controller/IceChartingController',
 		'router'
 	],
 

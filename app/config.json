@@ -158,6 +158,10 @@
         "eventToRaise" : "dialog:open:orthoQuality"
       },
       {
+        "name" : "IceCharting",
+        "eventToRaise" : "dialog:open:iceCharting"
+      },
+      {
         "name" : "About",
         "eventToRaise" : "dialog:open:about"
       }
