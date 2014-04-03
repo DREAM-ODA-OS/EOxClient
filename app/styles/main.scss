@@ -1,3 +1,31 @@
+//-------------------------------------------------------------------------------
+//
+// Project: EOxClient <https://github.com/EOX-A/EOxClient>
+// Authors: Daniel Santillan <daniel.santillan@eox.at>
+//
+//-------------------------------------------------------------------------------
+// Copyright (C) 2014 EOX IT Services GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies of this Software or works derived from this Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//-------------------------------------------------------------------------------
+
+
 $iconSpritePath: "../images/glyphicons-halflings.png";
 $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
 
@@ -17,9 +45,18 @@ $iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
 /*
  * Basic styles
  */
+
 html, body {
-	height: 100%;
-	width: 100%;
+  height: 100%;
+  width: 100%;
+  padding: 0 !important;
+  // FIXXME: Their are a few 'quirks' in the layout, making it necessary to force hidding the scrollbars
+  // for some cases:
+  overflow: hidden;
+}
+
+#viewContent{
+  position: relative;
 }
 
 ul, li {
@@ -40,6 +77,47 @@ hr {
   user-select: none;
 }
 
+body.wait *, body.wait {
+  cursor:wait !important;
+}
+
+// Mouse over tooltip
+.ui-tooltip {
+  display: inline-block;
+}
+
+.ui-tooltip-content {
+  font-size: .8em;
+}
+
+// Initial loading spinner element
+#loadscreen{
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  z-index: 5000;
+  text-align: center;
+  opacity: 0.8;
+}
+
+#loadscreen i {
+  top: 35%;
+  position: absolute;
+}
+
+div#preload { 
+  display: none;
+}
+
+// Error message element
+#error-messages{
+  position: absolute;
+  top: 60px;
+  width:40%;
+  left: 30%;
+}
+
 
 /*
  * Panels & Modals
@@ -54,6 +132,10 @@ hr {
   float: left;
   margin: -.55em 0 0 -.6em;
   font-size: 1em;
+}
+
+.modal{
+  overflow-y: hidden !important; 
 }
 
 
@@ -124,11 +206,12 @@ button[active=active] {
  * Tool control
  */
 .toolcontrol {
+  width: 5.2em;
   top: 10em;
   right: 3em;
   font-size: .9em;
-  position: relative;
-  float: right;
+  position: absolute;
+  right: 3em;
 }
 .toolcontrol .panel-heading h3 {
   text-align: center;
@@ -240,7 +323,7 @@ button[active=active] {
 }
 
 #viewContent{
-	position: relative;
+	//position: relative;
 }
 
 #OpenLayers_Control_Zoom_5 {
