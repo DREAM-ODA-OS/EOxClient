@@ -77,7 +77,64 @@
         "zoomOffset": 0
       }
     ],
-
+    "products": [
+      {
+        "name": "PanEuropean Fractional Snow Cover",
+        "visible": false,
+        "timeSlider": true,
+        "color":"green",
+        "view": {
+          "id": "daily_FSC_PanEuropean_Optical",
+          "protocol": "WMS",
+          "urls": [
+              "http://neso.cryoland.enveo.at/cryoland/ows"
+          ],
+          "style": "default"
+        },
+        "download": {
+          "id": "daily_FSC_PanEuropean_Optical",
+          "protocol": "EOWCS",
+          "url": "http://neso.cryoland.enveo.at/cryoland/ows"
+        }
+      },
+      {
+        "name": "PanEuropean Snow Water Equivalent",
+        "visible": false,
+        "timeSlider": true,
+        "color":"red",
+        "view": {
+          "id": "daily_SWE_PanEuropean_Microwave",
+          "protocol": "WMS",
+          "urls": [
+              "http://neso.cryoland.enveo.at/cryoland/ows"
+          ],
+          "style": "default"
+        },
+        "download": {
+          "id": "daily_SWE_PanEuropean_Microwave",
+          "protocol": "EOWCS",
+          "url": "http://neso.cryoland.enveo.at/cryoland/ows"
+        }
+      },
+      {
+        "name": "SRTM",
+        "visible": false,
+        "timeSlider": false,
+        "view": {
+          "id": "SRTM8bit_mosaic",
+          "protocol": "WMS",
+          "urls": [
+              "http://earthserver.eox.at/open/ows"
+          ],
+          "style": "default"
+        },
+        "download": {
+          "id": "SRTM_mosaic",
+          "protocol": "EOWCS",
+          "url": "http://earthserver.eox.at/open/ows"
+        }
+      }
+    ],
     "overlays": [
        {
         "name": "borders & labels",
@@ -286,9 +343,10 @@
     {
       "id":"download",
       "eventToRaise":"dialog:open:downloadSelection",
-      "description": "WCS Download selection Tool",
+      "description": "WCS Download Tool",
+      "disabledDescription": "Please make sure you have selected a product layer, an area of interest and a time of interest in order to use the download tool",
       "icon":"icon-download-alt",
-      "enabled":true,
+      "enabled":false,
       "active":false
     }
 

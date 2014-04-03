@@ -1,3 +1,30 @@
+//-------------------------------------------------------------------------------
+//
+// Project: EOxClient <https://github.com/EOX-A/EOxClient>
+// Authors: Daniel Santillan <daniel.santillan@eox.at>
+//
+//-------------------------------------------------------------------------------
+// Copyright (C) 2014 EOX IT Services GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies of this Software or works derived from this Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//-------------------------------------------------------------------------------
+
 (function() {
 	'use strict';
 
@@ -31,6 +58,13 @@
 			},
 
 			configure: function(config) {
+
+				// Load jquery ui tooltip tool
+                $(document).tooltip({ 
+                	position: { my: "left+5 center", at: "right center" },
+                	hide: { effect: false, duration: 0 },
+                	show:{ effect: false, delay: 700}
+                });
 
 				var v = {}; //views
 				var m = {};	//models
@@ -100,7 +134,8 @@
 								isBaseLayer: true,
 								wrapDateLine: baselayer.wrapDateLine,
 								zoomOffset: baselayer.zoomOffset,
-								time: baselayer.time
+								time: baselayer.time,
+								requestEncoding: baselayer.requestEncoding
 							}
 						})
 					);
@@ -115,6 +150,8 @@
 							name: products.name,
 							visible: products.visible,
 							timeSlider: products.timeSlider,
+							// Default to WMS if no protocol is defined
+ 							timeSliderProtocol: (products.timeSliderProtocol) ? products.timeSliderProtocol : "EOWCS",
 							color: products.color,
 							time: products.time,
 							opacity: 1,
@@ -137,7 +174,8 @@
 								isphericalMercator: products.view.isphericalMercator,
 								isBaseLayer: false,
 								wrapDateLine: products.view.wrapDateLine,
-								zoomOffset: products.view.zoomOffset
+								zoomOffset: products.view.zoomOffset,
+								requestEncoding: products.view.requestEncoding
 							},
 							download: {
 								id : products.download.id,
@@ -175,7 +213,8 @@
 								isBaseLayer: false,
 								wrapDateLine: overlay.wrapDateLine,
 								zoomOffset: overlay.zoomOffset,
-								time: overlay.time
+								time: overlay.time,
+								requestEncoding: overlay.requestEncoding
 							}
 						})
 					);
@@ -288,6 +327,7 @@
 								id: visTool.id,
 								eventToRaise: visTool.eventToRaise,
 								description: visTool.description,
+								disabledDescription: visTool.disabledDescription,
 								icon:visTool.icon,
 								enabled: visTool.enabled,
 								active: visTool.active,
@@ -324,12 +364,43 @@
                 this.timeSliderView = new v.TimeSliderView(config.timeSlider);
                 this.bottomBar.show(this.timeSliderView);
 
+				// Add a trigger for ajax calls in order to display loading state
+				// in mouse cursor to give feedback to the user the client is busy
+				$(document).ajaxStart(function() {
+				  Communicator.mediator.trigger("progress:change", true);
+				});
 
-				//this.router = new Router({views: this.views, regions: this.regions});
+				$(document).ajaxStop(function() {
+				  Communicator.mediator.trigger("progress:change", false);
+				});
 
+				$(document).ajaxError(function( event, request, settings ) {
+					var statuscode = "";
+					if (request.status != 0)
+						statuscode =  '; Status Code: '+ request.status;
+					$("#error-messages").append(
+					  	'<div class="alert alert-warning alert-danger">'+
+						  '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+
+						  '<strong>Warning!</strong> Error response on HTTP ' + settings.type + ' to '+ settings.url.split("?")[0] +
+						  statuscode +
+						'</div>'
+					);
 
-				//this.downloadView = new v.DownloadView();
+				});
 
+				// Go through Navigation Bar items and throw activation event for all
+                // elements that are marked with show == true
+                if (config.navBarConfig) {
+
+					_.each(config.navBarConfig.items, function(list_item){
+						if(list_item.show){
+							Communicator.mediator.trigger(list_item.eventToRaise);
+						}
+					}, this);
+				}
+
+				// Remove loading screen when this point is reached in the script
+				$('#loadscreen').remove();
 
 			}
 
