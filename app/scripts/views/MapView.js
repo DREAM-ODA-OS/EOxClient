@@ -55,6 +55,7 @@ define(['backbone',
 
 					this.listenTo(Communicator.mediator, "map:center", this.centerMap);
 					this.listenTo(Communicator.mediator, "map:layer:change", this.changeLayer);
+					this.listenTo(Communicator.mediator, 'map:set:extent', this.onSetExtent);
 					this.listenTo(Communicator.mediator, "productCollection:sortUpdated", this.onSortProducts);
 					this.listenTo(Communicator.mediator, "productCollection:updateOpacity", this.onUpdateOpacity);
 					this.listenTo(Communicator.mediator, "selection:activated", this.onSelectionActivated);
@@ -340,6 +341,11 @@ define(['backbone',
 
 				onGetMapExtent: function(){
 	            	return this.map.getExtent();
+	            },
+
+	            onSetExtent: function(bbox) {
+	            	this.map.zoomToExtent(bbox);
+
 	            },
 
 				onGetGeoJSON: function () {
