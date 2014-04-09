@@ -70,7 +70,7 @@
 				var m = {};	//models
 				var t = {};	//templates
 
-				var colors = d3.scale.category20();
+				var colors = d3.scale.category10();
 				var color_index = 0;
 
                 // Ingestion Engine options
