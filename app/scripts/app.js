@@ -44,7 +44,8 @@
         'controller/AddLocalProductController',
         'controller/IngestionAdminT6Controller',
         'controller/OrthoQualityController',
-		'router'
+		'router',
+		'd3'
 	],
 
 	function( Backbone, Communicator, globals, DialogRegion, 
@@ -68,6 +69,9 @@
 				var v = {}; //views
 				var m = {};	//models
 				var t = {};	//templates
+
+				var colors = d3.scale.category20();
+				var color_index = 0;
 
                 // Ingestion Engine options
 				globals.objects.add('ingestionEngineT5', config.ingestionEngineT5);
@@ -151,7 +155,7 @@
 							timeSlider: products.timeSlider,
 							// Default to WMS if no protocol is defined
  							timeSliderProtocol: (products.timeSliderProtocol) ? products.timeSliderProtocol : "EOWCS",
-							color: products.color,
+							color:  (products.color) ? products.color : colors(color_index++), 
 							time: products.time,
 							opacity: 1,
 							view:{
