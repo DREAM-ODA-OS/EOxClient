@@ -89,7 +89,7 @@ If you managed to reach this the last step you can start to hack the code.
 The browser view refreshes itself automatically reflecting the code changes made. 
 
 
-## How to deploy the code on a the server 
+## How to deploy the code on a server 
 
 0.  Create deployment package: 
 
