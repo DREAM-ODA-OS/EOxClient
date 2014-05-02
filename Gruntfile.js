@@ -28,6 +28,7 @@
 
 'use strict';
 var LIVERELOAD_PORT = 35729;
+var proxySnippet = require('grunt-connect-proxy/lib/utils').proxyRequest;
 var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
     return connect.static(require('path').resolve(dir));
@@ -87,10 +88,16 @@ module.exports = function (grunt) {
                 //hostname: 'localhost'
                 hostname: '0.0.0.0'
             },
+            proxies: [{
+            	context: '/opensearch', // the context of the data service
+		host: 'dream-nlr.nlr.nl', // wherever the data service is running
+		port: 80 // the port that the data service is running on
+	    }],
             livereload: {
                 options: {
                     middleware: function (connect) {
                         return [
+                            proxySnippet,
                             lrSnippet,
                             mountFolder(connect, '.tmp'),
                             mountFolder(connect, yeomanConfig.app)
@@ -418,6 +425,7 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:server',
             'concurrent:server',
+            'configureProxies:server', // added just before connect
             'connect:livereload',
             'open',
             'watch'

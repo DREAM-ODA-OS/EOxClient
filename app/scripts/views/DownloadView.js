@@ -151,6 +151,7 @@
 
         this.coverages.each(function(coverage) {
           var coverageJSON = coverage.toJSON();
+		  //alert(JSON.stringify(coverageJSON, null, 4));
           var $html = $(SelectCoverageListItemTmpl(coverageJSON));
           $downloadList.append($html);
           $html.find("i").popover({
