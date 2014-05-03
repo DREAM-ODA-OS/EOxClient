@@ -151,6 +151,7 @@
 					globals.products.add(
 						new m.LayerModel({
 							name: products.name,
+                            description: (products.description ? products.description: null),
 							visible: products.visible,
 							timeSlider: products.timeSlider,
 							// Default to WMS if no protocol is defined
@@ -178,12 +179,15 @@
 								isBaseLayer: false,
 								wrapDateLine: products.view.wrapDateLine,
 								zoomOffset: products.view.zoomOffset,
-								requestEncoding: products.view.requestEncoding
+								requestEncoding: products.view.requestEncoding,
+                                cloudMask: ( products.cloudMask != null ? products.cloudMask : false ),
+                                snowMask: ( products.snowMask != null ? products.cloudMask : false )   
 							},
 							download: {
 								id : products.download.id,
 								protocol: products.download.protocol,
-								url : products.download.url
+								url : products.download.url,
+                                rectified: ( products.rectified != null ? products.rectified : true )
 							}
 						})
 					);
