@@ -60,12 +60,16 @@
         "text!../config.json"   // static configuration file
 	],
 	function ( Backbone, App ) {
-		$.get("config.json", function(config_src) {
+
+        $.ajax({ url: "config.json", cache: false, success: function(config_src) {
 			
 			// load the data content specification
-            $.get(config_src.mapConfig.dataconfigurl, function(data_cfg) {
-
-                _.extend(config_src.mapConfig, data_cfg);
+            $.ajax({ 
+                url: config_src.mapConfig.dataconfigurl,
+                cache: false, 
+                success: function(data_cfg) {
+                    _.extend(config_src.mapConfig, data_cfg);
+                }
             });
 
             // Configure Debug options
@@ -105,7 +109,7 @@
                 App.start();
             });
 
-        });
+        }});
         
     });
 }).call( this );
