@@ -46,8 +46,8 @@
     	
     }
 
-    // assure all required JS modules + the configuration are available 
-    // ... and trigger the main app's setup 
+    // assure all required JS modules + the configuration are available
+    // ... and trigger the main app's setup
     root.require([
 		'backbone',
         'app',                  // the main app
@@ -61,55 +61,83 @@
 	],
 	function ( Backbone, App ) {
 
-        $.ajax({ url: "config.json", cache: false, success: function(config_src) {
-			
-			// load the data content specification
-            $.ajax({ 
-                url: config_src.mapConfig.dataconfigurl,
-                cache: false, 
-                success: function(data_cfg) {
-                    _.extend(config_src.mapConfig, data_cfg);
-                }
-            });
+        function error_handler( message, url, xhr)
+        {
+                window.alert( message+"\nURL: "+url
+                    +"\nERROR: "+xhr.status+" "+xhr.statusText )
+        }
 
-            // Configure Debug options
-            setuplogging(config_src.debug);
+        var config_url = "config.json";
 
-            var viewModules = [];
-            var models = [];
-            var templates = [];
-            var options = {};
-            var config = {};
+        $.ajax({
+            url: config_url,
+            async: false,
+            cache: false,
+            error: function( xhr, status_, error )
+            {
+                error_handler("Failed to load the client's configuration!\n"+
+                    "The client cannot be started!", config_url, xhr)
+            },
+            success: function(config_src)
+            {
 
-            // collect list of view modules
-            _.each(config_src.views, function(view) {
-                viewModules.push(view);
-            }, this);
+                // load the data content specification
 
-            // collect list of model modules
-            _.each(config_src.models, function(model) {
-                models.push(model);
-            }, this);
+                $.ajax({
+                    url: config_src.mapConfig.dataconfigurl,
+                    async: false,
+                    cache: false,
+                    error: function( xhr, status_, error )
+                    {
+                        error_handler( "Failed to load the data layers' "
+                            +"definitions!\nNo data layers will be displayed!",
+                            config_src.mapConfig.dataconfigurl, xhr)
+                    },
+                    success: function(data_cfg)
+                    {
+                        _.extend(config_src.mapConfig, data_cfg);
+                    }
+                });
 
-            // collect list of template modules
-            _.each(config_src.templates, function(tmpl) {
-                templates.push(tmpl.template);
-            }, this);
+                // Configure Debug options
+                setuplogging(config_src.debug);
 
-            // assure all required modules are available and start the main app
-            root.require([].concat(
-                config_src.mapConfig.visualizationLibs,     //Visualizations such as Openlayers or GlobWeb
-                config_src.mapConfig.module,                //Which module should be used for map visualization
-                config_src.mapConfig.model,                 //Which model to use for saving map data
-                viewModules,                            //All "activated" views are loaded
-                models,
-                templates
-            ), function(){
-                App.configure(config_src);
-                App.start();
-            });
+                var viewModules = [];
+                var models = [];
+                var templates = [];
+                var options = {};
+                var config = {};
 
-        }});
-        
+                // collect list of view modules
+                _.each(config_src.views, function(view) {
+                    viewModules.push(view);
+                }, this);
+
+                // collect list of model modules
+                _.each(config_src.models, function(model) {
+                    models.push(model);
+                }, this);
+
+                // collect list of template modules
+                _.each(config_src.templates, function(tmpl) {
+                    templates.push(tmpl.template);
+                }, this);
+
+                // assure all required modules are available and start the main app
+                root.require([].concat(
+                    config_src.mapConfig.visualizationLibs,     //Visualizations such as Openlayers or GlobWeb
+                    config_src.mapConfig.module,                //Which module should be used for map visualization
+                    config_src.mapConfig.model,                 //Which model to use for saving map data
+                    viewModules,                            //All "activated" views are loaded
+                    models,
+                    templates
+                ), function(){
+                    App.configure(config_src);
+                    App.start();
+                });
+
+            }
+        });
+
     });
 }).call( this );
