@@ -45,6 +45,7 @@ define(['backbone',
 						tileManager: this.tileManager
 					});
 
+					this.timeinterval = new Date();
 					console.log("Created Map");
 
 					//listen to moeveend event in order to keep router uptodate
@@ -64,8 +65,7 @@ define(['backbone',
 					this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
 					this.listenTo(Communicator.mediator, 'selection:changed', this.onSelectionChanged);
 					this.listenTo(Communicator.mediator, 'selection:bbox:changed', this.onSelectionBBoxChanged);
-					
-					
+					this.listenTo(Communicator.mediator, 'getfeatureinfo:response', this.onGetFeatureInfoResponse);
 
 					Communicator.reqres.setHandler('map:get:extent', _.bind(this.onGetMapExtent, this));
 					Communicator.reqres.setHandler('get:selection:json', _.bind(this.onGetGeoJSON, this));
@@ -92,6 +92,37 @@ define(['backbone',
 	                        }
 	                    )
 	                };
+
+	                var that = this;
+
+	               OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+		                defaultHandlerOptions: {
+		                    'single': true,
+		                    'double': false,
+		                    'pixelTolerance': 0,
+		                    'stopSingle': false,
+		                    'stopDouble': false
+		                },
+
+		                initialize: function(options) {
+		                    this.handlerOptions = OpenLayers.Util.extend(
+		                        {}, this.defaultHandlerOptions
+		                    );
+		                    OpenLayers.Control.prototype.initialize.apply(
+		                        this, arguments
+		                    ); 
+		                    this.handler = new OpenLayers.Handler.Click(
+		                        that, {
+		                            'click': that.onMapClick
+		                        }, this.handlerOptions
+		                    );
+		                }
+
+		            });
+
+                    var click = new OpenLayers.Control.Click();
+	                this.map.addControl(click);
+	                click.activate();
 
 	                for(var key in this.drawControls) {
 	                    this.map.addControl(this.drawControls[key]);
@@ -129,8 +160,7 @@ define(['backbone',
 				    var mapmodel = globals.objects.get('mapmodel');
 				    this.map.setCenter(new OpenLayers.LonLat(mapmodel.get("center")), mapmodel.get("zoom") );
 				    return this;
-                },
-
+				},
 				//method to create layer depending on protocol
 				//setting possible description attributes
 				createLayer: function (layerdesc) {
@@ -291,6 +321,59 @@ define(['backbone',
 					}
 				},
 
+				onMapClick: function(e){
+					//console.log(e);
+					var active_products = globals.products.filter(function(model) { return model.get('visible'); });
+
+					var width = e.currentTarget.clientWidth;
+					var height = e.currentTarget.clientHeight;
+					var featurecount = 10;
+					var bbox = this.map.getExtent();
+					bbox = bbox.toArray();
+					bbox = [bbox[1], bbox[0], bbox[3], bbox[2]].join(",");
+					var strtime = getISODateTimeString(this.timeinterval.start) + "/"+ getISODateTimeString(this.timeinterval.end);
+
+					console.log(this.map);
+
+					//var lonlat = this.map.getLonLatFromPixel(e.xy);
+					for (var i=0;i<active_products.length; ++i){
+
+
+						var req_url = active_products[i].get('view').urls[0];
+						var layer_id = active_products[i].get('view').id;
+						var request = 	req_url + '?' +
+										'LAYERS=' + layer_id + "_outlines" + "&" +
+									  	'QUERY_LAYERS=' + layer_id + "_outlines" + "&" +
+									  	'SERVICE=WMS&' +
+									  	'VERSION=1.3.0&' +
+									  	'REQUEST=GetFeatureInfo&' +
+									  	'BBOX=' + bbox + '&' +
+									  	'FEATURE_COUNT=' + featurecount + '&' +
+									  	'HEIGHT=' + height + '&' +
+									  	'WIDTH=' + width + '&' +
+									  	'INFO_FORMAT=text/html&' +
+									  	'CRS=EPSG:4326&'+
+									  	'X=' + e.x + '&' +
+									  	'Y=' + e.y + '&' +
+									  	'TIME=' + strtime;
+									  	;
+						console.log(request);
+
+						$.get( request, function(data) {
+						  Communicator.mediator.trigger("getfeatureinfo:response", data);
+						  console.log(data.responseText);
+						})
+						  .fail(function(data) {
+						    Communicator.mediator.trigger("getfeatureinfo:response", data);
+						    console.log(data.responseText);
+						  });
+					}
+				},
+
+				onGetFeatureInfoResponse: function(data){
+					console.log(data);
+				},
+
 				onExportGeoJSON: function() {		
 					var geojsonstring = this.geojson.write(this.vectorLayer.features, true);
 					
@@ -328,6 +411,8 @@ define(['backbone',
 				},
 
 				onTimeChange: function (time) {
+					this.timeinterval = time;
+					console.log(this.timeinterval);
 					var string = getISODateTimeString(time.start) + "/"+ getISODateTimeString(time.end);
 					
 					globals.products.each(function(product) {
