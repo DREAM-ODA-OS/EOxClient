@@ -66,14 +66,17 @@ define(['backbone',
 					this.listenTo(Communicator.mediator, 'selection:changed', this.onSelectionChanged);
 					this.listenTo(Communicator.mediator, 'selection:bbox:changed', this.onSelectionBBoxChanged);
 					this.listenTo(Communicator.mediator, 'getfeatureinfo:response', this.onGetFeatureInfoResponse);
+					this.listenTo(Communicator.mediator, 'map:marker:set', this.setMarker);
+					this.listenTo(Communicator.mediator, 'map:marker:clearAll', this.clearMarkers);
 
 					Communicator.reqres.setHandler('map:get:extent', _.bind(this.onGetMapExtent, this));
 					Communicator.reqres.setHandler('get:selection:json', _.bind(this.onGetGeoJSON, this));
 
 					// Add layers for different selection methods
 					this.vectorLayer = new OpenLayers.Layer.Vector("Vector Layer");
+					this.markerLayer = new OpenLayers.Layer.Markers("Marker Layer");
 
-	                this.map.addLayers([this.vectorLayer]);
+	                this.map.addLayers([this.vectorLayer,this.markerLayer]);
 	                this.map.addControl(new OpenLayers.Control.MousePosition());
 
 	                this.drawControls = {
@@ -92,6 +95,12 @@ define(['backbone',
 	                        }
 	                    )
 	                };
+
+                    //create shared marker icons
+                    globals.icons = {}
+                    globals.icons.pinWhite = new OpenLayers.Icon( 'images/icons/marker_pin_white.png', {w:19,h:32}, {x:-9,y:-32})
+
+                    console.log(globals.icons.pinWhite)
 
 	                var that = this;
 
@@ -321,9 +330,35 @@ define(['backbone',
 					}
 				},
 
+                setMarker: function(lonlat) {
+                    console.log('setMarker()')
+                    console.log(lonlat)
+                    this.markerLayer.clearMarkers();
+                    var marker = new OpenLayers.Marker(lonlat,globals.icons.pinWhite.clone());
+                    //var marker = new OpenLayers.Marker(lonlat);
+                    this.markerLayer.addMarker(marker)
+                },
+
+                clearMarkers: function() {
+                    this.markerLayer.clearMarkers();
+                },
+
 				onMapClick: function(e){
-					//console.log(e);
+
+					// get active data-layers
 					var active_products = globals.products.filter(function(model) { return model.get('visible'); });
+
+                    // click lon/lat coordinates
+                    var lonlat = this.map.getLonLatFromPixel(e.xy);
+
+                    // display a marker (if at least one layer selected)
+                    if ( active_products.length > 0 ) {
+                        // display marker only
+                        Communicator.mediator.trigger("map:marker:set", lonlat);
+                    } else {
+                        // clear any displayed marker
+                        Communicator.mediator.trigger("map:marker:clearAll");
+                    }
 
 					var width = e.currentTarget.clientWidth;
 					var height = e.currentTarget.clientHeight;
