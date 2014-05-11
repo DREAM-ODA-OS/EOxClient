@@ -38,6 +38,8 @@ define(['backbone',
 				
 				onShow: function() {
 
+                    var mapView = this
+
 					this.tileManager = new OpenLayers.TileManager();
 					this.map = new OpenLayers.Map({
 						div: "map",
@@ -45,12 +47,21 @@ define(['backbone',
 						tileManager: this.tileManager
 					});
 
-					this.timeinterval = new Date();
-					console.log("Created Map");
+					this.timeinterval = { start: null, end: null } ;
+
+					console.log("OpenLayer map created.");
 
 					//listen to moeveend event in order to keep router uptodate
 					this.map.events.register("moveend", this.map, function(data) {
-			            Communicator.mediator.trigger("router:setUrl", { x: data.object.center.lon, y: data.object.center.lat, l: data.object.zoom});
+
+                        console.log("moveend");
+
+                        Communicator.mediator.trigger("router:setUrl", {
+                            time: mapView.timeinterval,
+                            center: data.object.center,
+                            zoomLevel: data.object.zoom
+                        });
+
 			            Communicator.mediator.trigger("map:position:change", data.object.getExtent());
 			        });
 
@@ -244,7 +255,7 @@ define(['backbone',
 				},
 
 				centerMap: function(data){
-					this.map.setCenter(new OpenLayers.LonLat(data.x, data.y), data.l );
+					this.map.setCenter(new OpenLayers.LonLat(data.lon, data.lat), data.zoomLevel );
 				},
 
 				changeLayer: function(options){
@@ -382,7 +393,7 @@ define(['backbone',
                             w: clickEvent.currentTarget.clientWidth,
                             h: clickEvent.currentTarget.clientHeight
                         }
-                    }
+                    };
 
                     // click lon/lat coordinates
                     var lonlat = this.map.getLonLatFromPixel(clickEvent.xy);
@@ -498,8 +509,16 @@ define(['backbone',
 				},
 
 				onTimeChange: function (time) {
+
 					this.timeinterval = time;
-					//console.log(this.timeinterval);
+
+                    //update routes
+                    Communicator.mediator.trigger("router:setUrl", {
+                        time: this.timeinterval,
+                        center: this.map.center,
+                        zoomLevel: this.map.zoom
+                    });
+
 					var string = getISODateTimeString(time.start) + "/"+ getISODateTimeString(time.end);
 					
 					globals.products.each(function(product) {
