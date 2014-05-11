@@ -100,8 +100,6 @@ define(['backbone',
                     globals.icons = {}
                     globals.icons.pinWhite = new OpenLayers.Icon( 'images/icons/marker_pin_white.png', {w:19,h:32}, {x:-9,y:-32})
 
-                    console.log(globals.icons.pinWhite)
-
 	                var that = this;
 
 	               OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
@@ -331,8 +329,6 @@ define(['backbone',
 				},
 
                 setMarker: function(lonlat) {
-                    console.log('setMarker()')
-                    console.log(lonlat)
                     this.markerLayer.clearMarkers();
                     var marker = new OpenLayers.Marker(lonlat,globals.icons.pinWhite.clone());
                     //var marker = new OpenLayers.Marker(lonlat);
@@ -388,8 +384,6 @@ define(['backbone',
                         }
                     }
 
-                    console.log(prm);
-
                     // click lon/lat coordinates
                     var lonlat = this.map.getLonLatFromPixel(clickEvent.xy);
 
@@ -434,8 +428,8 @@ define(['backbone',
                             global: false,
                             success: function(data,status_,xhr,dtype) {
                                 Communicator.mediator.trigger("info:response", {
-                                    lonlat: prm.lonlat,     // click coordinates
-                                    product: layer,   // data-layer (product) definition
+                                    lonlat: prm.lonlat, // click coordinates
+                                    product: layer,     // data-layer (product) definition
                                     data: data,         // response data
                                     ctype: xhr.getResponseHeader('Content-Type') // HTTP response content-type
                                 });
@@ -505,7 +499,7 @@ define(['backbone',
 
 				onTimeChange: function (time) {
 					this.timeinterval = time;
-					console.log(this.timeinterval);
+					//console.log(this.timeinterval);
 					var string = getISODateTimeString(time.start) + "/"+ getISODateTimeString(time.end);
 					
 					globals.products.each(function(product) {
