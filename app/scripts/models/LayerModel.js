@@ -69,9 +69,14 @@
 			download: {
 				id : '',
 				protocol: '',
-				url : [],
-			}
-			
+				url : '',
+			},
+
+            info: {
+                id: null,
+                protocol: null,
+                url: null
+            }
 			
 		});
 

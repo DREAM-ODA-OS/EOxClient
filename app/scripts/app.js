@@ -148,6 +148,12 @@
 				//Productsare loaded and added to the global collection
 				_.each(config.mapConfig.products, function(products) {
 
+                    if (! products.info ) {
+                        products.info = {} ;
+                    }
+
+                    var is_wms = ( products.view.protocol == 'WMS' )
+
 					globals.products.add(
 						new m.LayerModel({
 							name: products.name,
@@ -188,7 +194,14 @@
 								protocol: products.download.protocol,
 								url : products.download.url,
                                 rectified: ( products.rectified != null ? products.rectified : true )
-							}
+							},
+                            info: {
+                                // NOTE: If the wiew protocol is WMS info default to getFeatureInfo()
+                                //       on the same layer.
+                                id: products.info.id ? products.info.id : ( is_wms ? products.view.id : null ),
+                                protocol: products.info.protocol ? products.info.protocol : ( is_wms ? 'WMS' : null ),
+                                url: products.info.url ? products.info.url : ( is_wms ? products.view.urls[0] : null )
+                            }
 						})
 					);
 					console.log("Added product " + products.view.id );

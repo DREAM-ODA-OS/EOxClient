@@ -65,7 +65,7 @@ define(['backbone',
 					this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
 					this.listenTo(Communicator.mediator, 'selection:changed', this.onSelectionChanged);
 					this.listenTo(Communicator.mediator, 'selection:bbox:changed', this.onSelectionBBoxChanged);
-					this.listenTo(Communicator.mediator, 'getfeatureinfo:response', this.onGetFeatureInfoResponse);
+					this.listenTo(Communicator.mediator, 'info:response', this.onGetFeatureInfoResponse);
 					this.listenTo(Communicator.mediator, 'map:marker:set', this.setMarker);
 					this.listenTo(Communicator.mediator, 'map:marker:clearAll', this.clearMarkers);
 
@@ -343,67 +343,125 @@ define(['backbone',
                     this.markerLayer.clearMarkers();
                 },
 
-				onMapClick: function(e){
+                onMapClick: function(clickEvent){
 
-					// get active data-layers
-					var active_products = globals.products.filter(function(model) { return model.get('visible'); });
+                    //TODO: move to global map configuration
+                    var map_crs_reverse_axes = true;
+
+                    // prepare getFeatureInfo request
+                    function getFetureInfoWMS13(info,prm){
+
+                        var format = "text/html" ;
+                        var maxFeatureCount = 1 ;
+
+                        var request = info.url +
+                            '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo' +
+                            '&LAYERS=' + info.id + '&QUERY_LAYERS=' + info.id +
+                            '&BBOX=' + prm.bbox.toBBOX(10,map_crs_reverse_axes) + '&CRS=' + prm.crs +
+                            '&TIME=' + getISODateTimeString(prm.time.start) + '/' + getISODateTimeString(prm.time.end) +
+                            '&HEIGHT=' + prm.size.h + '&WIDTH=' + prm.size.w +
+                            '&X=' + prm.xy.x + '&Y=' + prm.xy.y +
+                            '&INFO_FORMAT=' + format + '&FEATURE_COUNT=' + maxFeatureCount ;
+
+                        return {
+                            type: 'GET',
+                            url: request
+                        }
+                    }
+
+                    // get active data-layers
+                    var layers = globals.products.filter(function(model) { return model.get('visible'); });
+
+                    // request Parameters
+                    var prm = {
+                        time: {
+                            start: this.timeinterval.start,
+                            end: this.timeinterval.end
+                        },
+                        lonlat: this.map.getLonLatFromPixel(clickEvent.xy),
+                        bbox: this.map.getExtent(),
+                        crs: this.map.projection,
+                        xy: clickEvent.xy,
+                        size: {
+                            w: clickEvent.currentTarget.clientWidth,
+                            h: clickEvent.currentTarget.clientHeight
+                        }
+                    }
+
+                    console.log(prm);
 
                     // click lon/lat coordinates
-                    var lonlat = this.map.getLonLatFromPixel(e.xy);
+                    var lonlat = this.map.getLonLatFromPixel(clickEvent.xy);
 
                     // display a marker (if at least one layer selected)
-                    if ( active_products.length > 0 ) {
+                    if ( layers.length > 0 ) {
                         // display marker only
-                        Communicator.mediator.trigger("map:marker:set", lonlat);
+                        Communicator.mediator.trigger("map:marker:set",prm.lonlat);
                     } else {
                         // clear any displayed marker
                         Communicator.mediator.trigger("map:marker:clearAll");
                     }
 
-					var width = e.currentTarget.clientWidth;
-					var height = e.currentTarget.clientHeight;
-					var featurecount = 10;
-					var bbox = this.map.getExtent();
-					bbox = bbox.toArray();
-					bbox = [bbox[1], bbox[0], bbox[3], bbox[2]].join(",");
-					var strtime = getISODateTimeString(this.timeinterval.start) + "/"+ getISODateTimeString(this.timeinterval.end);
+                    // trigger an event reseting the view 
+                    Communicator.mediator.trigger("info:start",{ lonlat: prm.lonlat, products: layers})
 
-					console.log(this.map);
+                    for (var i=0 ; i<layers.length ; ++i ) {
 
-					//var lonlat = this.map.getLonLatFromPixel(e.xy);
-					for (var i=0;i<active_products.length; ++i){
+                        var layer = layers[i]
+                        var info = layers[i].get('info') ;
 
+                        switch ( info.protocol ) {
 
-						var req_url = active_products[i].get('view').urls[0];
-						var layer_id = active_products[i].get('view').id;
-						var request = 	req_url + '?' +
-										'LAYERS=' + layer_id + "_outlines" + "&" +
-									  	'QUERY_LAYERS=' + layer_id + "_outlines" + "&" +
-									  	'SERVICE=WMS&' +
-									  	'VERSION=1.3.0&' +
-									  	'REQUEST=GetFeatureInfo&' +
-									  	'BBOX=' + bbox + '&' +
-									  	'FEATURE_COUNT=' + featurecount + '&' +
-									  	'HEIGHT=' + height + '&' +
-									  	'WIDTH=' + width + '&' +
-									  	'INFO_FORMAT=text/html&' +
-									  	'CRS=EPSG:4326&'+
-									  	'X=' + e.x + '&' +
-									  	'Y=' + e.y + '&' +
-									  	'TIME=' + strtime;
-									  	;
-						console.log(request);
+                            case 'WMS': // WMS protocol - getFeatureInfo
+                                var request = getFetureInfoWMS13(info,prm) ;
+                                break ;
 
-						$.get( request, function(data) {
-						  Communicator.mediator.trigger("getfeatureinfo:response", data);
-						  console.log(data.responseText);
-						})
-						  .fail(function(data) {
-						    Communicator.mediator.trigger("getfeatureinfo:response", data);
-						    console.log(data.responseText);
-						  });
-					}
-				},
+                            /* TODO WPS
+                            case 'WPS': // WPS protocol - EOxServer specific
+                                request = getWPS(info,prm) ;
+                                break ;
+                            */
+
+                            default:
+                                console.error('Unsupported info protocol "'+info.protocol+'" ! LAYER="'+layer.get('view').id+'"');
+                                continue ;
+                        }
+
+                        // get the response
+
+                        $.ajax( _.extend(request,{
+                            async: false,
+                            global: false,
+                            success: function(data,status_,xhr,dtype) {
+                                Communicator.mediator.trigger("info:response", {
+                                    lonlat: prm.lonlat,     // click coordinates
+                                    product: layer,   // data-layer (product) definition
+                                    data: data,         // response data
+                                    ctype: xhr.getResponseHeader('Content-Type') // HTTP response content-type
+                                });
+                            },
+                            error: function(xhr, status_, error) {
+                                var url = request.url ;
+                                var url_short = ( url.length > 40 ? url.substring(0, 37)+'...' : url ) ;
+                                console.log(xhr);
+                                $("#error-messages").append(
+                                    '<div class="alert alert-warning alert-danger">'+
+                                      '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+
+                                      '<strong>Warning!</strong> '
+                                      +'Info request failed!<br>'
+                                      +'ERROR: '+xhr.status+' '+xhr.statusText+'<br>'
+                                      +'URL: <a target="_blank" href="'+url+'">'+url_short+'</a><br>'+
+                                    '</div>'
+                                );
+                            }
+                        }));
+
+                    }
+
+                    // trigger an event iindicating end of the responses
+                    Communicator.mediator.trigger("info:stop")
+
+                },
 
 				onGetFeatureInfoResponse: function(data){
 					console.log(data);
