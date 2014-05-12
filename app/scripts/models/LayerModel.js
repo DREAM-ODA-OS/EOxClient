@@ -38,6 +38,7 @@
 
 		var LayerModel = Backbone.Model.extend({
 			name: '',
+			description: null,
 			timeSlider: false,
 			timeSliderProtocol: '',
 			color: "",
@@ -64,6 +65,9 @@
 				wrapDateLine: null,
 				zoomOffset: null,
 				requestEncoding: 'KVP',
+				// extraLayers: optional key-value store of extra layers such as
+				//              {'outlines':'xy_outlines','cloudMask':'xy_clouds','masked':'yx_masked' ...}
+				extraLayers: {}
 			},
 
 			download: {

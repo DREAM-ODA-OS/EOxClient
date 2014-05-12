@@ -154,6 +154,12 @@
 
                     var is_wms = ( products.view.protocol == 'WMS' )
 
+                    // parse extra wms layers
+                    var extraLayers = {};
+                    if ( products.view.extraLayers && typeof products.view.extraLayers == 'object' ) {
+                        extraLayers = _.extend({},products.view.extraLayers);
+                    }
+
 					globals.products.add(
 						new m.LayerModel({
 							name: products.name,
@@ -186,8 +192,7 @@
 								wrapDateLine: products.view.wrapDateLine,
 								zoomOffset: products.view.zoomOffset,
 								requestEncoding: products.view.requestEncoding,
-                                cloudMask: ( products.cloudMask != null ? products.cloudMask : false ),
-                                snowMask: ( products.snowMask != null ? products.cloudMask : false )   
+                                extraLayers: extraLayers
 							},
 							download: {
 								id : products.download.id,
