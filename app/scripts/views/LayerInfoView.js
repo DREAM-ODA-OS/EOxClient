@@ -48,7 +48,8 @@
 
             initialize: function() {
 
-                this.model.on('change:lonlat',this.update,this);
+                this.model.on('change:responseExpected',this.update,this);
+                this.model.on('change:lonlat',this.updateLonLat,this);
                 this.model.on('change:responses',this.update,this);
 
             },
@@ -68,9 +69,7 @@
 
             onClose: function() {},
 
-            update: function() {
-
-                // local utilities
+            updateLonLat: function() {
 
                 function dec2dg(v,neg,pos){
                     var tmp = v;
@@ -82,6 +81,14 @@
                     return dg+'&deg;&nbsp;'+mn+'&prime;&nbsp;'+tmp.toFixed(2)+'&Prime;&nbsp;'+ltr;
                 }
 
+                // update click location
+                var ll = this.model.get('lonlat') ;
+                $('#layer-info-location-lon').html( ll ? dec2dg(ll.lon,'W','E') : 'n/a' );
+                $('#layer-info-location-lat').html( ll ? dec2dg(ll.lat,'S','N') : 'n/a' );
+            },
+
+            update: function() {
+
                 function getFirstValidResp( list ){
                     for ( var i = 0 ; i < list.length ; ++i ) {
                         if ( list[i].data ) { return list[i] ; }
@@ -90,40 +97,37 @@
                 }
 
                 // update the view
+                var inProgress = this.model.get('responseExpected');
+                var products = this.model.get('products');
+                var response = getFirstValidResp( this.model.get('responses') );
 
-                // click location
-                var ll = this.model.get('lonlat') ;
-                $('#layer-info-location-lon').html( ll ? dec2dg(ll.lon,'W','E') : 'n/a' );
-                $('#layer-info-location-lat').html( ll ? dec2dg(ll.lat,'S','N') : 'n/a' );
-
-                // content
-                var prds = this.model.get('products');
-                var rsp  = getFirstValidResp( this.model.get('responses') );
+                // abort update if no valid response received yet
+                if ( inProgress && !response ) { $('#layer-info-view-alert').html("Query in progress ...") ; return ; }
 
                 var msg_common = "<br>Clict on the map to update this view."
-                var msg = ( rsp ? '' : ( prds.length > 0 ? 'No feature has been selected.' :
+                var msg = ( response ? '' : ( products.length > 0 ? 'No feature has been selected.' :
                           'There is no layer selected.<br>Select one in the <strong>Layers</strong> overlay.')+msg_common);
 
                 $('#layer-info-view-alert').html(msg)
 
-                $('#layer-info-layer-name').html( rsp ? rsp.info.name : "n/a");
-                $('#layer-info-layer-descr').html( rsp ? rsp.info.description : "n/a");
+                $('#layer-info-layer-name').html( response ? response.info.name : "n/a");
+                $('#layer-info-layer-descr').html( response ? response.info.description : "n/a");
 
                 // display layer's overlay
-                if ( !rsp && prds.length == 0 ) {
+                if ( !response && products.length == 0 ) {
                     Communicator.mediator.trigger('ui:open:layercontrol');
                 }
 
                 var frame = $('#layer-info-frame') ;
 
-                if ( rsp && rsp.protocol == 'WMS' &&  rsp.request.type == 'GET' ) {
+                if ( response && response.protocol == 'WMS' &&  response.request.type == 'GET' ) {
                     frame.css('display','block');
-                    //frame.attr('src',rsp.request.url);
-                    frame.attr('srcdoc',rsp.data); // HTML5 feature
+                    frame.attr('srcdoc',response.data); // HTML5 feature - overides 'src' attribute when supported by the browser
+                    frame.attr('src',response.request.url);
                 } else {
                     frame.css('display','none');
-                    frame.attr('srcdoc','');
-                    frame.attr('src','about:blank');
+                    frame.removeAttr('srcdoc');
+                    frame.removeAttr('src')
                 }
 
             },

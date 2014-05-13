@@ -75,7 +75,6 @@
                 }) ;
 
                 this.set({responses: resps});
-
             },
 
             finish: function() {
