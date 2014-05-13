@@ -118,9 +118,11 @@
 
                 if ( rsp && rsp.protocol == 'WMS' &&  rsp.request.type == 'GET' ) {
                     frame.css('display','block');
-                    frame.attr('src',rsp.request.url);
+                    //frame.attr('src',rsp.request.url);
+                    frame.attr('srcdoc',rsp.data); // HTML5 feature
                 } else {
                     frame.css('display','none');
+                    frame.attr('srcdoc','');
                     frame.attr('src','about:blank');
                 }
 
