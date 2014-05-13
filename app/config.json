@@ -155,7 +155,7 @@
       },
       {
         "name" : "Quality",
-        "eventToRaise" : "dialog:open:orthoQuality"
+        "eventToRaise" : "dialog:toggle:orthoQuality"
       },
       {
         "name" : "Feature Info",
