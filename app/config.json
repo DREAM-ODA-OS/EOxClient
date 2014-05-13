@@ -158,6 +158,10 @@
         "eventToRaise" : "dialog:open:orthoQuality"
       },
       {
+        "name" : "Feature Info",
+        "eventToRaise" : "dialog:toggle:layerInfo"
+      },
+      {
         "name" : "About",
         "eventToRaise" : "dialog:open:about"
       }
@@ -183,6 +187,7 @@
     "views/BaseLayerSelectionView",
     "views/LayerSelectionView",
     "views/LayerItemView",
+    "views/LayerInfoView",
     "views/ContentView",
     "views/TimeSliderView",
     "views/ToolSelectionView",
@@ -193,6 +198,7 @@
 
   "models":[
     "models/LayerModel",
+    "models/LayerInfoModel",
     "models/MapModel",
     "models/NavBarCollection",
     "models/NavBarItemModel",

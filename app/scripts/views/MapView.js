@@ -76,7 +76,6 @@ define(['backbone',
 					this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
 					this.listenTo(Communicator.mediator, 'selection:changed', this.onSelectionChanged);
 					this.listenTo(Communicator.mediator, 'selection:bbox:changed', this.onSelectionBBoxChanged);
-					this.listenTo(Communicator.mediator, 'info:response', this.onGetFeatureInfoResponse);
 					this.listenTo(Communicator.mediator, 'map:marker:set', this.setMarker);
 					this.listenTo(Communicator.mediator, 'map:marker:clearAll', this.clearMarkers);
 
@@ -434,12 +433,14 @@ define(['backbone',
 
                         // get the response
 
-                        $.ajax( _.extend(request,{
+                        $.ajax( _.extend(_.clone(request),{
                             async: false,
                             global: false,
                             success: function(data,status_,xhr,dtype) {
                                 Communicator.mediator.trigger("info:response", {
                                     lonlat: prm.lonlat, // click coordinates
+                                    protocol: info.protocol, // request protocol
+                                    request: request,   // request object
                                     product: layer,     // data-layer (product) definition
                                     data: data,         // response data
                                     ctype: xhr.getResponseHeader('Content-Type') // HTTP response content-type
@@ -467,10 +468,6 @@ define(['backbone',
                     Communicator.mediator.trigger("info:stop")
 
                 },
-
-				onGetFeatureInfoResponse: function(data){
-					console.log(data);
-				},
 
 				onExportGeoJSON: function() {		
 					var geojsonstring = this.geojson.write(this.vectorLayer.features, true);

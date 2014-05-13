@@ -39,6 +39,7 @@
 		'jquery', 'backbone.marionette',
 		'controller/ContentController',
 		'controller/DownloadController',
+        'controller/LayerInfoController',
 		'controller/SelectionManagerController',
         'controller/IngestionAdminT5Controller',
         'controller/AddLocalProductController',
