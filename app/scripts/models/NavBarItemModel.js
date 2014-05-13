@@ -35,7 +35,6 @@
 			icon: "",
 			content: "",
 			eventToRaise: ""
-
 		});
 		return {'NavBarItemModel':NavBarItemModel};
 	});

@@ -142,27 +142,33 @@
     "items" : [
       {
         "name" : "Layers",
+        "icon" : "fa-globe",
         "eventToRaise" : "ui:toggle:layercontrol",
         "template" : "LayerControl"
       },
       {
         "name" : "Download",
+        "icon" : "fa-download",
         "eventToRaise" : "dialog:toggle:downloadSelection"
       },
       {
         "name" : "Ingestion",
+        "icon" : "fa-sign-in",
         "eventToRaise" : "dialog:toggle:ingestionAdminT5"
       },
       {
         "name" : "Quality",
+        "icon" : "fa-eye",
         "eventToRaise" : "dialog:toggle:orthoQuality"
       },
       {
         "name" : "Feature Info",
+        "icon" : "fa-map-marker",
         "eventToRaise" : "dialog:toggle:layerInfo"
       },
       {
         "name" : "About",
+        "icon" : "fa-info",
         "eventToRaise" : "dialog:open:about"
       }
     ]
