@@ -151,7 +151,7 @@
       },
       {
         "name" : "Ingestion",
-        "eventToRaise" : "dialog:open:ingestionAdminT5"
+        "eventToRaise" : "dialog:toggle:ingestionAdminT5"
       },
       {
         "name" : "Quality",
