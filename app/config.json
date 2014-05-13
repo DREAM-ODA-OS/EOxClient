@@ -142,7 +142,7 @@
     "items" : [
       {
         "name" : "Layers",
-        "eventToRaise" : "ui:open:layercontrol",
+        "eventToRaise" : "ui:toggle:layercontrol",
         "template" : "LayerControl"
       },
       {
