@@ -147,7 +147,7 @@
       },
       {
         "name" : "Download",
-        "eventToRaise" : "dialog:open:downloadSelection"
+        "eventToRaise" : "dialog:toggle:downloadSelection"
       },
       {
         "name" : "Ingestion",
