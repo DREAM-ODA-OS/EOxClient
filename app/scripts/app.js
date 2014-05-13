@@ -167,8 +167,8 @@
                             description: (products.description ? products.description: null),
 							visible: products.visible,
 							timeSlider: products.timeSlider,
-							// Default to WMS if no protocol is defined
- 							timeSliderProtocol: (products.timeSliderProtocol) ? products.timeSliderProtocol : "EOWCS",
+							// Default to WMS if no protocol is defined (allowed protocols: WMS|EOWCS|WPS)
+ 							timeSliderProtocol: (products.timeSliderProtocol) ? products.timeSliderProtocol : 'WMS',
 							color:  (products.color) ? products.color : colors(color_index++), 
 							time: products.time,
 							opacity: 1,
