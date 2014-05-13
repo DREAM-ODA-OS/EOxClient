@@ -403,15 +403,15 @@
 				$(document).ajaxError(function( event, request, settings ) {
 					var statuscode = "";
 					if (request.status != 0)
-						statuscode =  '; Status Code: '+ request.status;
+						statuscode =  '<br>Status Code: '+ request.status;
 					$("#error-messages").append(
 					  	'<div class="alert alert-warning alert-danger">'+
 						  '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+
-						  '<strong>Warning!</strong> Error response on HTTP ' + settings.type + ' to '+ settings.url.split("?")[0] +
-						  statuscode +
+						  '<strong><i class="fa fa-fw fa-exclamation-triangle"></i>&nbsp;ERROR: '+
+                          'HTTP/' + settings.type + ' request failed!</strong>'+
+                          '<br>URL:&nbsp;'+settings.url.split("?")[0] + statuscode +
 						'</div>'
 					);
-
 				});
 
 				// Go through Navigation Bar items and throw activation event for all
