@@ -13,18 +13,17 @@
 		"bootstrap-datepicker"
 	],
 
-	//function( Backbone, Communicator, DownloadSelectionTmpl ) {
+
 	function( Backbone, Communicator, IceChartingTmpl, SelectIcechartListItemTmpl, IcechartInfoTmpl ) {
 
 		var IceChartingView = Backbone.Marionette.CompositeView.extend({  
 
 			tagName: "div",
-			className: "panel panel-default downloadselection not-selectable",
+			className: "panel panel-default icecharting not-selectable",
 			template: {type: 'handlebars', template: IceChartingTmpl},
 			events: {
 				'click #btn-draw-bbox':'onBBoxClick',
 				"click #btn-clear-bbox" : 'onClearClick',
-				"click #btn-download" : 'onDownloadClick',
 				"click #btn-saveconfig" : 'onSaveconfigClick',
 				"click #btn-opensearch" : 'onOpensearchClick',
 				"change #txt-minx" : "onBBoxChange",
@@ -35,7 +34,6 @@
 			},
 
 
-            change_pending : false,
 			
 			onShow: function (view) {
 
@@ -54,7 +52,7 @@
 		    	});
 
 
- 		        var $openserachList = this.$("#opensearch-list");
+ 		        var $openserachList = this.$("#list-opensearch");
 		        $openserachList.children().remove();
 
 
@@ -68,7 +66,6 @@
 				// disable all button's
 				this.$("#btn-opensearch").attr("disabled", "disabled");
 				this.$("#btn-saveconfig").attr("disabled", "disabled");
-				this.$("#btn-download").attr("disabled", "disabled");
 
 				$(document).on('touch click', '#div-date-begin .input-group-addon', function(e){
 				    $('input[type="text"]', $(this).parent()).focus();
@@ -97,18 +94,12 @@ htmlTemplate
 				// disable all button's
 				this.$("#btn-opensearch").attr("disabled", "disabled");
 				this.$("#btn-saveconfig").attr("disabled", "disabled");
-				this.$("#btn-download").attr("disabled", "disabled");
 				// clear opensearch List
-				var $openserachList = root.$("#opensearch-list");
+				var $openserachList = root.$("#list-opensearch");
 				// remove item(s) out list
 				$openserachList.children().remove();
 			},
-
-			onDownloadClick: function () {
-				Communicator.mediator.trigger("dialog:open:download", true);
-			},
-
-
+	
 			onSaveconfigClick: function () {
 
 				var startDatestr = getISODateTimeString(this.model.get('ToI').start);
@@ -131,8 +122,13 @@ htmlTemplate
 
 			onOpensearchClick: function () {
 
+				$("#txt-opensearch").val("Searching....");
+
+				// Opensearch selection NLR or FEDEO
+				var selectionopensearch = $("#select-opensearch").val();
+		
 				// add list to dialoag
-				var $openserachList = root.$("#opensearch-list");
+				var $openserachList = root.$("#list-opensearch");
 				// remove item(s) out list
 				$openserachList.children().remove();
 
@@ -142,10 +138,9 @@ htmlTemplate
 				var bbox = this.model.get("AoI").getBounds();
 				var AoIStr = String(bbox.left.toFixed(3))+','+String(bbox.bottom.toFixed(3))+','+String(bbox.right.toFixed(3))+','+String(bbox.top.toFixed(3));
 				// set url parameters
-				var params = { bbox:AoIStr, startdate:startDatestr, endDate:endDatestr, maxrecord:10 };
+				var params = { bbox:AoIStr, startdate:startDatestr, endDate:endDatestr, maxrecord:50 };
 				var query_args = jQuery.param( params );
 				var url = '/opensearch/opensearch?'+query_args;
-			
 				//var url = '/opensearch/opensearch?&startdate=2008-03-08T00:00:00.00Z&enddate=2008-03-08T23:99:99.00Z';
 			
 				function getData() {
@@ -159,14 +154,15 @@ htmlTemplate
 
 				function handleData(data , textStatus, jqXHR ) {
 
+					// get number of results					
+					var txtNumberResults = $(data).find("os\\:totalResults").text();
+
+					// init object
 					var jsonObj = [];
 
 					// do for all entry's
 					$(data).find('entry').each(function(){
 						/* Parse the XML File */
-						//var title = $(this).find('title').text();
-						//var timeupdated = $(this).find('updated').text();
-
 						var temp_obj = {};
 						temp_obj["coverageId"] = $(this).find('title').text();
 					    temp_obj["updated"] = $(this).find('updated').text();
@@ -174,18 +170,24 @@ htmlTemplate
 
 	 			   	});
 
+					if (jsonObj.length > 0){
+						// display number of search results
+						$("#txt-opensearch").val("Number of results: "+txtNumberResults);
 
-					// add entry's to list
-					for (var i = 0; i < jsonObj.length; i++) {
-						var $html = $(SelectIcechartListItemTmpl(jsonObj[i]));
-						$openserachList.append($html);
-						$html.find("i").popover({
-							trigger: "hover",
-							html: true,
-							content: IcechartInfoTmpl(jsonObj[i]),
-							title: "Information",
-							placement: "bottom"
-						});
+						// add entry's to list
+						for (var i = 0; i < jsonObj.length; i++) {
+							var $html = $(SelectIcechartListItemTmpl(jsonObj[i]));
+							$openserachList.append($html);
+							$html.find("i").popover({
+								trigger: "hover",
+								html: true,
+								content: IcechartInfoTmpl(jsonObj[i]),
+								title: "Information",
+								placement: "bottom"
+							});
+						}
+					} else {
+						$("#txt-opensearch").val("No results");
 					}
 				}
 
@@ -217,7 +219,6 @@ htmlTemplate
 					// enable all button's
 					this.$("#btn-opensearch").removeAttr("disabled");
 					this.$("#btn-saveconfig").removeAttr("disabled");
-					this.$("#btn-download").removeAttr("disabled");
 				}
 				
 			},
@@ -234,7 +235,6 @@ htmlTemplate
 				// disable all button's
 				this.$("#btn-opensearch").attr("disabled", "disabled");
 				this.$("#btn-saveconfig").attr("disabled", "disabled");
-				this.$("#btn-download").attr("disabled", "disabled");
 
 				if(!isNaN(values.left) && !isNaN(values.right) &&
 					!isNaN(values.bottom) && !isNaN(values.top) ) {
@@ -244,7 +244,6 @@ htmlTemplate
 						// enable all button's
 						this.$("#btn-opensearch").removeAttr("disabled");
 						this.$("#btn-saveconfig").removeAttr("disabled");
-						this.$("#btn-download").removeAttr("disabled");
 					}
 				}
 			},

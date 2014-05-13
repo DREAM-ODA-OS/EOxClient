@@ -4,58 +4,74 @@
 </div>
 
 <div class="panel-body">
+	<table>
+		<tr>
+			<td valign="top" width="30%">
+			  <div class="input-group">
+				<span class="input-group-addon fixed-sized-addon">Min X</span>
+				<input type="text" class="form-control" placeholder="min-x" id="txt-minx">
+			  </div>
 
-  <div class="input-group">
-    <span class="input-group-addon fixed-sized-addon">Min X</span>
-    <input type="text" class="form-control" placeholder="min-x" id="txt-minx">
-  </div>
+			  <div class="input-group">
+				<span class="input-group-addon fixed-sized-addon">Min Y</span>
+				<input type="text" class="form-control" placeholder="min-y" id="txt-miny">
+			  </div>
 
-  <div class="input-group">
-    <span class="input-group-addon fixed-sized-addon">Min Y</span>
-    <input type="text" class="form-control" placeholder="min-y" id="txt-miny">
-  </div>
+			  <div class="input-group">
+				<span class="input-group-addon fixed-sized-addon">Max X</span>
+				<input type="text" class="form-control" placeholder="max-x" id="txt-maxx">
+			  </div>
 
-  <div class="input-group">
-    <span class="input-group-addon fixed-sized-addon">Max X</span>
-    <input type="text" class="form-control" placeholder="max-x" id="txt-maxx">
-  </div>
+			  <div class="input-group">
+				<span class="input-group-addon fixed-sized-addon">Max Y</span>
+				<input type="text" class="form-control" placeholder="max-y" id="txt-maxy">
+			  </div>
 
-  <div class="input-group">
-    <span class="input-group-addon fixed-sized-addon">Max Y</span>
-    <input type="text" class="form-control" placeholder="max-y" id="txt-maxy">
-  </div>
+			  <div class="btn-group input-group-level btn-block" style="width:100%;">
+				<button type="button" class="btn btn-default" id="btn-draw-bbox" style="width:85%;">Draw Bounding Box</button>
+				<button type="button" class="btn btn-default" id="btn-clear-bbox" style="width:15%;"><i class="fa fa-trash-o"></i></button>
+			  </div>
 
-  <div class="btn-group input-group-level btn-block" style="width:100%;">
-    <button type="button" class="btn btn-default" id="btn-draw-bbox" style="width:85%;">Draw Bounding Box</button>
-    <button type="button" class="btn btn-default" id="btn-clear-bbox" style="width:15%;"><i class="fa fa-trash-o"></i></button>
-  </div>
+		
+			  <h6>Date Range</h6>
 
-    
-  <h6>Date Range</h6>
+			  <div class="input-group input-prepend input-append date" id="div-date-begin">
+				<span class="input-group-addon fixed-sized-addon">Start</span>
+				<input type="text" class="form-control" placeholder="begin time" id="txt-date-begin">
+				<span class="input-group-addon">
+					<i class="fa fa-calendar"></i>
+				</span>
+			  </div>
 
-  <div class="input-group input-prepend input-append date" id="div-date-begin">
-    <span class="input-group-addon fixed-sized-addon">Start</span>
-    <input type="text" class="form-control" placeholder="begin time" id="txt-date-begin">
-    <span class="input-group-addon">
-        <i class="fa fa-calendar"></i>
-    </span>
-  </div>
+			  <div class="input-group input-prepend input-append date" id="div-date-end">
+				<span class="input-group-addon fixed-sized-addon">End</span>
+				<input type="text" class="form-control" placeholder="end time" id="txt-date-end">
+				<span class="input-group-addon">
+					<i class="fa fa-calendar"></i>
+				</span>
+			  </div>
 
-  <div class="input-group input-prepend input-append date" id="div-date-end">
-    <span class="input-group-addon fixed-sized-addon">End</span>
-    <input type="text" class="form-control" placeholder="end time" id="txt-date-end">
-    <span class="input-group-addon">
-        <i class="fa fa-calendar"></i>
-    </span>
-  </div>
- 
+			  <p>
+	  		    <h6>OpenSearch Selection</h6>
+				<select class="input-medium" id="select-opensearch">
+				  <option value="nlr" selected>NLR</option>
+				  <option value="fedeo">FEDEO</option>
+				</select>
+			  </p>
 
+			  <button class="btn btn-block btn-primary" id="btn-opensearch"  href="#modal-start-opensearch"></i>OpenSearch</button>
+			  <button class="btn btn-block btn-primary" id="btn-saveconfig"  href="#modal-start-save"><i class="icon-white icon-save-alt"></i>Save configuration</button>
+
+			</td>
+			<td valign="top" width="70%">
+				<input type="text" class="form-control" id="txt-opensearch">
+				<div style="overflow:auto; height:360px" class="panel-body" id="list-opensearch"></div>
+			</td>
+	 	</tr>
+	</table>
 </div>
 
-<div class="panel-body" id="opensearch-list"></div>
 
 <div class="panel-footer">
-  <button class="btn btn-block btn-primary" id="btn-opensearch"  href="#modal-start-opensearch"></i>OpenSearch</button>
-  <button class="btn btn-block btn-primary" id="btn-saveconfig"  href="#modal-start-save"><i class="icon-white icon-save-alt"></i>Save configuration</button>
-  <button class="btn btn-block btn-primary" id="btn-download"  href="#modal-start-download"><i class="icon-white icon-download-alt"></i>Download</button>
+
 </div>

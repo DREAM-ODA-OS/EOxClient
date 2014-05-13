@@ -268,6 +268,19 @@ button[active=active] {
 .downloadselection .btn-group {
   margin-top: .6em;
 }
+
+/*
+ * Icechart Panel
+ */
+.icecharting{
+  width: 62em; //Increasing the width here
+  top: 10em;
+  right: 3em;
+  font-size: .9em;
+  position: relative;
+  float: right;
+}
+
 /*
  * Old Styles
  */
