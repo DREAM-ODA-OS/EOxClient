@@ -40,6 +40,35 @@
 			type:"",
 			size: null
 		});
-		return {'ToolModel':ToolModel};
+
+        function parseSelectionTool(obj) {
+            return new ToolModel({
+                id: obj.id,
+                description: obj.description,
+                icon: obj.icon,
+                enabled: true,
+                active: false,
+                type: "selection"
+            });
+        }
+
+        function parseVisualizationTool(obj) {
+            return new ToolModel({
+                id: obj.id,
+                eventToRaise: obj.eventToRaise,
+                description: obj.description,
+                disabledDescription: obj.disabledDescription,
+                icon: obj.icon,
+                enabled: obj.enabled,
+                active: obj.active,
+                type: "tool"
+            })
+        }
+
+        return {
+            parseVisualizationTool: parseVisualizationTool,
+            parseSelectionTool: parseSelectionTool,
+            ToolModel: ToolModel
+        };
 	});
 }).call( this );

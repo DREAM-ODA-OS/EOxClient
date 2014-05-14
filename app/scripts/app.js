@@ -67,10 +67,6 @@
                 	show:{ effect: false, delay: 700}
                 });
 
-				var v = {}; //views
-				var m = {};	//models
-				var t = {};	//templates
-
 				var colors = d3.scale.category10();
 				var color_index = 0;
 
@@ -86,193 +82,60 @@
 				}, this);
 
 				//Load all configured views
-				_.each(config.views, function(viewDef) {
-					var View = require(viewDef);
-					$.extend(v, View);
-				}, this);
+				var views = {};
+				_.each(config.views, function(item){ $.extend(views,require(item)); }, this);
 
 				//Load all configured models
-				_.each(config.models, function(modelDef) {
-					var Model = require(modelDef);
-					$.extend(m, Model);
-				}, this);
+				var models = {}
+				_.each(config.models, function(item){ $.extend(models,require(item)); }, this);
 
 				//Load all configured templates
-				_.each(config.templates, function(tmplDef) {
-					var Tmpl = require(tmplDef.template);
-					t[tmplDef.id] = Tmpl;
-				}, this);
+				var templates = {};	//templates
+				_.each(config.templates, function(item){ templates[item.id] = require(item.template); }, this);
 
 
 				//Map attributes are loaded and added to the global map model
-				globals.objects.add('mapmodel', new m.MapModel({
-						visualizationLibs : config.mapConfig.visualizationLibs,
-						center: config.mapConfig.center,
-						zoom: config.mapConfig.zoom
-					})
-				);
+				globals.objects.add('mapmodel', models.parseMapConfig(config.mapConfig)); 
 
 				//Base Layers are loaded and added to the global collection
-				_.each(config.mapConfig.baseLayers, function(baselayer) {
-
-					globals.baseLayers.add(
-						new m.LayerModel({
-							name: baselayer.name,
-							visible: baselayer.visible,
-							view: {
-								id : baselayer.id,
-								urls : baselayer.urls,
-								protocol: baselayer.protocol,
-								projection: baselayer.projection,
-								attribution: baselayer.attribution,
-								matrixSet: baselayer.matrixSet,
-								style: baselayer.style,
-								format: baselayer.format,
-								resolutions: baselayer.resolutions,
-								maxExtent: baselayer.maxExtent,
-								gutter: baselayer.gutter,
-								buffer: baselayer.buffer,
-								units: baselayer.units,
-								transitionEffect: baselayer.transitionEffect,
-								isphericalMercator: baselayer.isphericalMercator,
-								isBaseLayer: true,
-								wrapDateLine: baselayer.wrapDateLine,
-								zoomOffset: baselayer.zoomOffset,
-								time: baselayer.time,
-								requestEncoding: baselayer.requestEncoding
-							}
-						})
-					);
-					console.log("Added baselayer " + baselayer.id );
-				}, this);
-
-				//Productsare loaded and added to the global collection
-				_.each(config.mapConfig.products, function(products) {
-
-                    if (! products.info ) {
-                        products.info = {} ;
-                    }
-
-                    var is_wms = ( products.view.protocol == 'WMS' )
-
-                    // parse extra wms layers
-                    var extraLayers = {};
-                    if ( products.view.extraLayers && typeof products.view.extraLayers == 'object' ) {
-                        extraLayers = _.extend({},products.view.extraLayers);
-                    }
-
-					globals.products.add(
-						new m.LayerModel({
-							name: products.name,
-                            description: (products.description ? products.description: null),
-							visible: products.visible,
-							timeSlider: products.timeSlider,
-							// Default to WMS if no protocol is defined (allowed protocols: WMS|EOWCS|WPS)
- 							timeSliderProtocol: (products.timeSliderProtocol) ? products.timeSliderProtocol : 'WMS',
-							color:  (products.color) ? products.color : colors(color_index++), 
-							time: products.time,
-							opacity: 1,
-							view:{
-								id : products.view.id,
-								protocol: products.view.protocol,
-								urls : products.view.urls,
-								visualization: products.view.visualization,
-								projection: products.view.projection,
-								attribution: products.view.attribution,
-								matrixSet: products.view.matrixSet,
-								style: products.view.style,
-								format: products.view.format,
-								resolutions: products.view.resolutions,
-								maxExtent: products.view.maxExtent,
-								gutter: products.view.gutter,
-								buffer: products.view.buffer,
-								units: products.view.units,
-								transitionEffect: products.view.transitionEffect,
-								isphericalMercator: products.view.isphericalMercator,
-								isBaseLayer: false,
-								wrapDateLine: products.view.wrapDateLine,
-								zoomOffset: products.view.zoomOffset,
-								requestEncoding: products.view.requestEncoding,
-                                extraLayers: extraLayers
-							},
-							download: {
-								id : products.download.id,
-								protocol: products.download.protocol,
-								url : products.download.url,
-                                rectified: ( products.rectified != null ? products.rectified : true )
-							},
-                            info: {
-                                // NOTE: If the wiew protocol is WMS info default to getFeatureInfo()
-                                //       on the same layer.
-                                id: products.info.id ? products.info.id : ( is_wms ? products.view.id : null ),
-                                protocol: products.info.protocol ? products.info.protocol : ( is_wms ? 'WMS' : null ),
-                                url: products.info.url ? products.info.url : ( is_wms ? products.view.urls[0] : null )
-                            }
-						})
-					);
-					console.log("Added product " + products.view.id );
+				_.each(config.mapConfig.baseLayers, function(item) {
+					globals.baseLayers.add( models.parseBaseLayer(item) );
+					console.log("Added base-layer " + item.id );
 				}, this);
 
 				//Overlays are loaded and added to the global collection
-				_.each(config.mapConfig.overlays, function(overlay) {
+				_.each(config.mapConfig.overlays, function(item) {
+					globals.overlays.add( models.parseOverlayLayer(item) );
+					console.log("Added overlay-layer " + item.id );
+				}, this);
 
-					globals.overlays.add(
-						new m.LayerModel({
-							name: overlay.name,
-							visible: overlay.visible,
-							view: {
-								id : overlay.id,
-								urls : overlay.urls,
-								protocol: overlay.protocol,
-								projection: overlay.projection,
-								attribution: overlay.attribution,
-								matrixSet: overlay.matrixSet,
-								style: overlay.style,
-								format: overlay.format,
-								resolutions: overlay.resolutions,
-								maxExtent: overlay.maxExtent,
-								gutter: overlay.gutter,
-								buffer: overlay.buffer,
-								units: overlay.units,
-								transitionEffect: overlay.transitionEffect,
-								isphericalMercator: overlay.isphericalMercator,
-								isBaseLayer: false,
-								wrapDateLine: overlay.wrapDateLine,
-								zoomOffset: overlay.zoomOffset,
-								time: overlay.time,
-								requestEncoding: overlay.requestEncoding
-							}
-						})
-					);
-					console.log("Added overlay " + overlay.id );
+				//Productsare loaded and added to the global collection
+				_.each(config.mapConfig.products, function(item) {
+					globals.products.add( models.parseProductLayer(item) );
+					console.log("Added data-layer " + item.view.id );
 				}, this);
 
 
 				// Create map view and execute show of its region
-				this.map.show(new v.MapView({el: $("#map")}));
+				this.map.show(new views.MapView({el: $("#map")}));
 
 				// If Navigation Bar is set in configuration go through the
 				// defined elements creating a item collection to rendered
 				// by the marionette collection view
 				if (config.navBarConfig) {
 
-					var navBarItemCollection = new m.NavBarCollection;
+					var navBarItemCollection = new models.NavBarCollection();
 
-					_.each(config.navBarConfig.items, function(list_item){
-						navBarItemCollection.add(
-							new m.NavBarItemModel({
-								name:list_item.name,
-                                icon:list_item.icon,
-								eventToRaise:list_item.eventToRaise
-							}));
+					_.each(config.navBarConfig.items, function(item){
+						navBarItemCollection.add(models.parseNavBarItemConfig(item));
 					}, this);
 
-					this.topBar.show(new v.NavBarCollectionView(
-						{template: t.NavBar({
+					this.topBar.show(new views.NavBarCollectionView(
+						{template: templates.NavBar({
 							title: config.navBarConfig.title,
 							url: config.navBarConfig.url}),
 						className:"navbar navbar-inverse navbar-opaque navbar-fixed-top not-selectable",
-						itemView: v.NavBarItemView, tag: "div",
+						itemView: views.NavBarItemView, tag: "div",
 						collection: navBarItemCollection}));
 
 				};
@@ -280,8 +143,8 @@
 				// Added region to test combination of backbone
 				// functionality combined with jQuery UI
 				this.addRegions({dialogRegion: DialogRegion.extend({el: "#viewContent"})});
-				this.DialogContentView = new v.ContentView({
-					template: {type: 'handlebars', template: t.Info},
+				this.DialogContentView = new views.ContentView({
+					template: {type: 'handlebars', template: templates.Info},
                     id: "about",
                     className: "modal fade",
                     attributes: {
@@ -295,33 +158,36 @@
 				});
 
 				// Create the views - these are Marionette.CollectionViews that render ItemViews
-                this.baseLayerView = new v.BaseLayerSelectionView({
+                this.baseLayerView = new views.BaseLayerSelectionView({
                 	collection:globals.baseLayers,
-                	itemView: v.LayerItemView.extend({
+                	itemView: views.LayerItemView.extend({
                 		template: {
                 			type:'handlebars',
-                			template: t.BulletLayer},
+                			template: templates.BulletLayer
+                		},
                 		className: "radio"
                 	})
                 });
 
-                this.productsView = new v.LayerSelectionView({
+                this.productsView = new views.LayerSelectionView({
                 	collection:globals.products,
-                	itemView: v.LayerItemView.extend({
+                	itemView: views.LayerItemView.extend({
                 		template: {
                 			type:'handlebars',
-                			template: t.CheckBoxLayer},
+                			template: templates.CheckBoxLayer
+                		},
                 		className: "sortable-layer"
                 	}),
                 	className: "sortable"
                 });
 
-                this.overlaysView = new v.BaseLayerSelectionView({
+                this.overlaysView = new views.BaseLayerSelectionView({
                 	collection:globals.overlays,
-                	itemView: v.LayerItemView.extend({
+                	itemView: views.LayerItemView.extend({
                 		template: {
                 			type:'handlebars',
-                			template: t.CheckBoxOverlayLayer},
+                			template: templates.CheckBoxOverlayLayer
+                		},
                 		className: "checkbox"
                 	}),
                 	className: "check"
@@ -332,62 +198,45 @@
 
 
                 // Define collection of selection tools
-                var selectionToolsCollection = new m.ToolCollection();
-                _.each(config.selectionTools, function(selTool) {
-					selectionToolsCollection.add(
-							new m.ToolModel({
-								id: selTool.id,
-								description: selTool.description,
-								icon:selTool.icon,
-								enabled: true,
-								active: false,
-								type: "selection"
-							}));
+                var selectionToolsCollection = new models.ToolCollection();
+                _.each(config.selectionTools, function(item) {
+					selectionToolsCollection.add( models.parseSelectionTool(item) );
 				}, this);
 
                 // Define collection of visualization tools
-                var visualizationToolsCollection = new m.ToolCollection();
-                _.each(config.visualizationTools, function(visTool) {
-					visualizationToolsCollection.add(
-							new m.ToolModel({
-								id: visTool.id,
-								eventToRaise: visTool.eventToRaise,
-								description: visTool.description,
-								disabledDescription: visTool.disabledDescription,
-								icon:visTool.icon,
-								enabled: visTool.enabled,
-								active: visTool.active,
-								type: "tool"
-							}));
+                var visualizationToolsCollection = new models.ToolCollection();
+                _.each(config.visualizationTools, function(item) {
+					visualizationToolsCollection.add( models.parseVisualizationTool(item) ); 
 				}, this);
 
                 // Create Collection Views to hold set of views for selection tools
-                this.visualizationToolsView = new v.ToolSelectionView({
+                this.visualizationToolsView = new views.ToolSelectionView({
                 	collection:visualizationToolsCollection,
-                	itemView: v.ToolItemView.extend({
+                	itemView: views.ToolItemView.extend({
                 		template: {
                 			type:'handlebars',
-                			template: t.ToolIcon}
+                			template: templates.ToolIcon
+                		}
                 	})
                 });
 
                 // Create Collection Views to hold set of views for visualization tools
-                this.selectionToolsView = new v.ToolSelectionView({
+                this.selectionToolsView = new views.ToolSelectionView({
                 	collection:selectionToolsCollection,
-                	itemView: v.ToolItemView.extend({
+                	itemView: views.ToolItemView.extend({
                 		template: {
                 			type:'handlebars',
-                			template: t.ToolIcon}
+                			template: templates.ToolIcon
+                		}
                 	})
                 });
-
 
 
                 // Create layout to hold collection views
                 this.toolLayout = new ToolControlLayout();
 
 
-                this.timeSliderView = new v.TimeSliderView(config.timeSlider);
+                this.timeSliderView = new views.TimeSliderView(config.timeSlider);
                 this.bottomBar.show(this.timeSliderView);
 
 				// Add a trigger for ajax calls in order to display loading state
@@ -429,8 +278,6 @@
 				$('#loadscreen').remove();
 
 			}
-
-
 
 		});
 
