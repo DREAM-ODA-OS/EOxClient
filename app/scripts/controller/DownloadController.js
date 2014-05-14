@@ -26,95 +26,114 @@
 //-------------------------------------------------------------------------------
 
 (function() {
-	'use strict';
+    'use strict';
 
-	var root = this;
+    var root = this;
 
-	root.require([
-		'backbone',
-		'communicator',
-    	'globals',
-		'app',
-		'views/DownloadView',
-		'views/DownloadSelectionView',
-    	'models/DownloadModel'
-	],
+    root.require([
+        'backbone',
+        'communicator',
+        'globals',
+        'app',
+        'views/DownloadView',
+        'views/DownloadSelectionView',
+        'models/DownloadModel'
+    ],
 
-	function( Backbone, Communicator, globals, App, v, ds, m ) {
+    function( Backbone, Communicator, globals, App, v, ds, m ) {
 
-		var DownloadController = Backbone.Marionette.Controller.extend({
-			model: new m.DownloadModel(),
-			view: null,
+        var DownloadController = Backbone.Marionette.Controller.extend({
 
-	    initialize: function(options){
-	      	this.model.set('products', {});
-	        this.listenTo(Communicator.mediator, "map:layer:change", this.onChangeLayer);
-	        this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
-	        this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
-	        this.listenTo(Communicator.mediator, "dialog:open:download", this.onDownloadToolOpen);
-	        this.listenTo(Communicator.mediator, "dialog:open:downloadSelection", this.onDownloadSelectionOpen);
+            model: new m.DownloadModel(),
+            view: null,
 
-	        this.view = new ds.DownloadSelectionView({model:this.model});
-		},
+            initialize: function(options){
+                this.model.set('products', {});
+                this.listenTo(Communicator.mediator, "map:layer:change", this.onChangeLayer);
+                this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
+                this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
+                this.listenTo(Communicator.mediator, "dialog:open:download", this.onDownloadToolOpen);
+                this.listenTo(Communicator.mediator, "dialog:open:downloadSelection", this.onDownloadSelectionOpen);
+                this.listenTo(Communicator.mediator, "dialog:close:downloadSelection", this.onDownloadSelectionClose);
+                this.listenTo(Communicator.mediator, "dialog:toggle:downloadSelection", this.onDownloadSelectionToggle);
 
-		onChangeLayer: function (options) {
-	        if (!options.isBaseLayer){
-	            var layer = globals.products.find(function(model) { return model.get('name') == options.name; });
-	            if (layer) { // Layer will be empty if it is an overlay layer
-					var products = this.model.get('products');
-		        	if(options.visible){
-		        		products[layer.get('download').id] = layer;    
-		          	}else{
-		            	delete products[layer.get('download').id];
-		          	}
-		          	this.model.set('products', products);
-	            }
-	        }
-	    },
+                this.view = new ds.DownloadSelectionView({model:this.model});
+            },
 
-	    onTimeChange: function(time) {
-	        this.model.set('ToI',time);
-		},
+            onChangeLayer: function (options) {
+                if (!options.isBaseLayer){
+                    var layer = globals.products.find(function(model) { return model.get('name') == options.name; });
+                    if (layer) { // Layer will be empty if it is an overlay layer
+                        var products = this.model.get('products');
+                        if(options.visible){
+                            products[layer.get('download').id] = layer;
+                        }else{
+                            delete products[layer.get('download').id];
+                        }
+                        this.model.set('products', products);
+                    }
+                }
+            },
 
-	    onSelectionChange: function(selection) {
-	        if (selection != null) {
-	          if(selection.CLASS_NAME == "OpenLayers.Geometry.Polygon"){
-	            this.model.set('AoI', selection);
-	          }
-	        }else{
-	          this.model.set('AoI', null);
-	        }
-		},
+            onTimeChange: function(time) {
+                this.model.set('ToI',time);
+            },
 
-		checkDownload: function() {
-	      	// Check that all necessary selections are available
-	        if(this.model.get('ToI') != null &&
-	           this.model.get('AoI') != null &&
-	           _.size(this.model.get('products')) > 0){
-	          Communicator.mediator.trigger('selection:enabled', {id:"download", enabled:true} );
-	        }else{
-	          Communicator.mediator.trigger('selection:enabled', {id:"download", enabled:false} );
-	        }
-	      },
+            onSelectionChange: function(selection) {
+                if (selection != null) {
+                  if(selection.CLASS_NAME == "OpenLayers.Geometry.Polygon"){
+                    this.model.set('AoI', selection);
+                  }
+                }else{
+                  this.model.set('AoI', null);
+                }
+            },
 
-		onDownloadToolOpen: function(toOpen) {
-            if(toOpen){
-              App.viewContent.show(new v.DownloadView({model:this.model}));
-            }else{
-              App.viewContent.close();
+            checkDownload: function() {
+                // Check that all necessary selections are available
+                if(this.model.get('ToI') != null &&
+                   this.model.get('AoI') != null &&
+                   _.size(this.model.get('products')) > 0){
+                  Communicator.mediator.trigger('selection:enabled', {id:"download", enabled:true} );
+                }else{
+                  Communicator.mediator.trigger('selection:enabled', {id:"download", enabled:false} );
+                }
+              },
+
+            onDownloadToolOpen: function(toOpen) {
+                if(toOpen){
+                  App.viewContent.show(new v.DownloadView({model:this.model}));
+                } /*else{
+                  App.viewContent.close();
+                }*/
+            },
+
+            isDownloadSelectionClosed: function() {
+                return _.isUndefined(this.view.isClosed) || this.view.isClosed ;
+            },
+
+            onDownloadSelectionOpen: function (event_) {
+                if ( this.isDownloadSelectionClosed() ) {
+                    App.viewContent.show(this.view);
+                }
+            },
+
+            onDownloadSelectionClose: function (event_) {
+                if ( ! this.isDownloadSelectionClosed() ) {
+                    this.view.close();
+                }
+            },
+
+            onDownloadSelectionToggle: function (event_) {
+                if ( this.isDownloadSelectionClosed() ) {
+                    this.onDownloadSelectionOpen(event_);
+                } else {
+                    this.onDownloadSelectionClose(event_);
+                }
             }
-        },
+        });
 
-		onDownloadSelectionOpen: function (event) {
-			if (_.isUndefined(this.view.isClosed) || this.view.isClosed) {	
-				App.viewContent.show(this.view);
-			}else{
-				this.view.close();
-			}
-		}
-
-		});
-		return new DownloadController();
-	});
+        return new DownloadController();
+    });
 
 }).call( this );

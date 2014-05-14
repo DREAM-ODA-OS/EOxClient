@@ -30,13 +30,25 @@
 	var root = this;
 	root.define(['backbone','communicator'],
 	function( Backbone, Communicator ) {
+
 		var NavBarItemModel = Backbone.Model.extend({
 			name: "",
 			icon: "",
 			content: "",
 			eventToRaise: ""
-
 		});
-		return {'NavBarItemModel':NavBarItemModel};
+
+        function parseNavBarItemConfig(obj) {
+            return new NavBarItemModel({
+                name: obj.name,
+                icon: obj.icon,
+                eventToRaise: obj.eventToRaise
+            });
+        }
+
+        return {
+            parseNavBarItemConfig: parseNavBarItemConfig,
+            NavBarItemModel: NavBarItemModel
+        };
 	});
 }).call( this );

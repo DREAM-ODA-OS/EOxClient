@@ -89,7 +89,7 @@ If you managed to reach this the last step you can start to hack the code.
 The browser view refreshes itself automatically reflecting the code changes made. 
 
 
-## How to deploy the code on a the server 
+## How to deploy the code on a server 
 
 0.  Create deployment package: 
 
@@ -97,12 +97,28 @@ The browser view refreshes itself automatically reflecting the code changes made
     grunt build
     ```
 
-    This command creates `dist` directory containing the produced deployment 
-    version. This directory should be then packed by some archiving tool (`zip`, `tar`, `cpio` ... etc.)
-    creating the deployment package.
+    This command creates `./ODAClient/dist/` directory containing the produced deployment 
+    version. Take the directory and mode it to other location: 
+    
+    ```
+    mv ./ODAClient/dist ./ODAClient-my-build-x.y.z
+    ```
+    
+    This directory should be then packed by some archiving tool (`zip`, `tar`, `cpio` ... etc.)
+    creating the *deployment package*, e.g., as follows:
+    ```
+    tar -cvzf ./ODAClient-my-build-x.y.z.tgz ./ODAClient-my-build-x.y.z
+    ```
+    
+    This *deployment package* is independent of the grunt *development environment* and can be deployed
+    as static content with any web-server capable of serving static files. 
+    
 
-0.  Put the content of the deployment package to your server and make sure
-    the web server can access the `index.html` file. 
+0.  Copy and unpack the content of the deployment package to your server and make sure
+    the web-server can access the `index.html` file.
+
+0.  Tailor the client's cofiguration (`config.json` and `data.json` files) to fit your application. 
+
 
 ## Setting up the development environment on Ubuntu 12.4 
 
