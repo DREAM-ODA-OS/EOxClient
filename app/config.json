@@ -168,6 +168,7 @@
       },
       {
         "name" : "IceCharting",
+        "icon" : "fa-anchor",
         "eventToRaise" : "dialog:open:iceCharting"
       },
       {
