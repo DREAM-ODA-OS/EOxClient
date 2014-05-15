@@ -27,54 +27,98 @@
 
 
 (function() {
-	'use strict';
+    'use strict';
 
-	var root = this;
+    var root = this;
 
-	root.require([
-		'backbone',
-		'communicator',
-		'app'
-	],
+    root.require([
+        'backbone',
+        'communicator',
+        'app'
+    ],
 
-	function( Backbone, Communicator, App ) {
+    function( Backbone, Communicator, App ) {
 
-		var ContentController = Backbone.Marionette.Controller.extend({
+        var ContentController = Backbone.Marionette.Controller.extend({
+
             initialize: function(options){
-            	this.listenTo(Communicator.mediator, "dialog:open:about", this.onDialogOpenAbout);
-            	this.listenTo(Communicator.mediator, "ui:open:layercontrol", this.onLayerControlOpen);
-            	this.listenTo(Communicator.mediator, "ui:open:toolselection", this.onToolSelectionOpen);
-            	
-            	
-			},
+                this.listenTo(Communicator.mediator, "dialog:open:about", this.onDialogOpenAbout);
+                this.listenTo(Communicator.mediator, "ui:open:layercontrol", this.onLayerControlOpen);
+                this.listenTo(Communicator.mediator, "ui:close:layercontrol", this.onLayerControlClose);
+                this.listenTo(Communicator.mediator, "ui:toggle:layercontrol", this.onLayerControlToggle);
+                this.listenTo(Communicator.mediator, "ui:open:toolselection", this.onToolSelectionOpen);
+                this.listenTo(Communicator.mediator, "ui:close:toolselection", this.onToolSelectionClose);
+                this.listenTo(Communicator.mediator, "ui:toggle:toolselection", this.onToolSelectionToggle);
+            },
 
-			onDialogOpenAbout: function(event){
-				App.dialogRegion.show(App.DialogContentView);
-			},
-			onLayerControlOpen: function(event){
-				//We have to render the layout before we can
+            isLayerControlClosed: function(){
+                return _.isUndefined(App.layout.isClosed) || App.layout.isClosed ;
+            },
+
+            isToolSelectionClosed: function(){
+                return _.isUndefined(App.toolLayout.isClosed) || App.toolLayout.isClosed ;
+            },
+
+            onDialogOpenAbout: function(event_){
+                App.dialogRegion.show(App.DialogContentView);
+            },
+
+            onLayerControlOpen: function(event_){
+                //We have to render the layout before we can
                 //call show() on the layout's regions
-                if (_.isUndefined(App.layout.isClosed) || App.layout.isClosed) {
-				  	App.leftSideBar.show(App.layout);
-	                App.layout.baseLayers.show(App.baseLayerView);
-	                App.layout.products.show(App.productsView);
-	                App.layout.overlays.show(App.overlaysView);
-				} else {
-					App.layout.close();
+                if ( this.isLayerControlClosed() ) {
+                    App.leftSideBar.show(App.layout);
+                    App.layout.baseLayers.show(App.baseLayerView);
+                    App.layout.products.show(App.productsView);
+                    App.layout.overlays.show(App.overlaysView);
                 }
-               
-			},
-			onToolSelectionOpen: function(event){
-				if (_.isUndefined(App.toolLayout.isClosed) || App.toolLayout.isClosed) {
-					App.rightSideBar.show(App.toolLayout);
-					App.toolLayout.selection.show(App.selectionToolsView);
-					App.toolLayout.visualization.show(App.visualizationToolsView);
-				} else {
-					App.toolLayout.close();
-				}
-			}
-		});
-		return new ContentController();
-	});
+            },
+
+            onLayerControlClose: function(event_){
+                if ( ! this.isLayerControlClosed() ) {
+                    App.layout.close();
+                }
+
+            },
+
+            onLayerControlToggle: function(event_){
+                if ( this.isLayerControlClosed() ) {
+                    this.onLayerControlOpen(event_);
+                } else {
+                    this.onLayerControlClose(event_);
+                }
+
+            },
+
+            onToolSelectionOpen: function(event_){
+                //We have to render the layout before we can
+                //call show() on the layout's regions
+                if ( this.isToolSelectionClosed() )
+                {
+                    App.rightSideBar.show(App.toolLayout);
+                    App.toolLayout.selection.show(App.selectionToolsView);
+                    App.toolLayout.visualization.show(App.visualizationToolsView);
+                }
+            },
+
+            onToolSelectionClose: function(event_){
+                if ( ! this.isToolSelectionClosed() ) {
+                    App.toolLayout.close();
+                }
+            },
+
+            onToolSelectionToggle: function(event_){
+                if ( this.isToolSelectionClosed() ) {
+                    this.onToolSelectionOpen(event_);
+                } else {
+                    this.onToolSelectionClose(event_);
+                }
+            }
+
+        });
+
+        return new ContentController();
+
+    });
 
 }).call( this );

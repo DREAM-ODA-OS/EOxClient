@@ -18,6 +18,9 @@
           "id": "Spot4Take5_N1C",
           "protocol": "EOWCS",
           "url": "http://data.eox.at/instance00/ows"
+        },
+        "info": {
+          "id": "Spot4Take5_N1C_outlines"
         }
       },
       {
@@ -37,6 +40,9 @@
           "id": "Spot4Take5_N2A_PENTE",
           "protocol": "EOWCS",
           "url": "http://data.eox.at/instance00/ows"
+        },
+        "info": {
+          "id": "Spot4Take5_N2A_PENTE_outlines"
         }
       },
       {
@@ -56,6 +62,9 @@
           "id": "Landsat5_2A",
           "protocol": "EOWCS",
           "url": "http://data.eox.at/instance00/ows"
+        },
+        "info": {
+          "id": "Landsat5_2A_outlines"
         }
       },
       {
@@ -75,6 +84,9 @@
           "id": "Landsat7_2A",
           "protocol": "EOWCS",
           "url": "http://data.eox.at/instance00/ows"
+        },
+        "info": {
+           "id": "Landsat7_2A_outlines"
         }
       },
       {
@@ -94,6 +106,9 @@
           "id": "GISAT_SimS2",
           "protocol": "EOWCS",
           "url": "http://data.eox.at/instance00/ows"
+      },
+      "info": {
+        "id": "GISAT_SimS2_outlines"
         }
       },
     {
@@ -113,6 +128,9 @@
         "id": "MERIS_FR__L1_EUSC",
         "protocol": "EOWCS",
         "url": "http://data.eox.at/instance01/ows"
+      },
+      "info": {
+        "id": "MERIS_FR__L1_EUSC_outlines"
       }
     },
     {
@@ -132,6 +150,9 @@
         "id": "ASAR_IMM_L1",
         "protocol": "EOWCS",
         "url": "http://data.eox.at/instance01/ows"
+      },
+      "info": {
+        "id": "ASAR_IMM_L1_outlines"
       }
     },
     {
@@ -151,6 +172,9 @@
         "id": "MERIS_FRS_L1",
         "protocol": "EOWCS",
         "url": "http://data.eox.at/instance01/ows"
+      },
+      "info": {
+        "id": "MERIS_FRS_L1_outlines"
       }
     },
     {
@@ -170,6 +194,9 @@
         "id": "ASAR_IMM_L1_ALL_view",
         "protocol": "EOWCS",
         "url": "http://data.eox.at/instance01/ows"
+      },
+      "info": {
+        "id": "MERIS_FRS_L1_outlines"
       }
     },
     {
@@ -189,6 +216,9 @@
         "id": "MERIS_FRS_L1_ALL_view",
         "protocol": "EOWCS",
         "url": "http://data.eox.at/instance01/ows"
+      },
+      "info": {
+        "id": "MERIS_FRS_L1_ALL_view_outlines"
       }
     }
   ]

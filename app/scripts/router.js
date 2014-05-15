@@ -53,21 +53,69 @@
 				this.listenTo(Communicator.mediator, "router:setUrl", this.setUrl);
 			},
 
-			setUrl: function(data){
-				 //round to two decimals
-                data.x = Math.round(data.x * 100)/100;
-                data.y = Math.round(data.y * 100)/100;
-                var urlFragment = 'map/'+data.x+'/'+data.y+'/'+data.l;  
-                App.router.navigate(urlFragment, 
-                    {trigger:false});
-			},
+            setUrl: function(data){
+                // number of digits after the decimal point
+                var ndec = 4 ;
 
-			routes : {
-                "map/:x/:y/:l" : "centerAndZoom"
+                var urlFragment = 'map'+
+                    '/'+(data.center.lon).toFixed(ndec)+
+                    '/'+(data.center.lat).toFixed(ndec)+
+                    '/'+data.zoomLevel ;
+
+                if(data.time) {
+                    urlFragment += '/'+getISODateTimeString(data.time.start)+
+                                   '/'+getISODateTimeString(data.time.end) ;
+                }
+
+                App.router.navigate(urlFragment,{trigger:false});
             },
 
-            centerAndZoom : function(x,y,l){
-                Communicator.mediator.trigger('map:center', {x:x, y:y, l:l});
+            routes : {
+                'map/:x/:y/:l' : 'setSpatExt',
+                'map/:x/:y/:l/:s/:e' : 'setSpatTempExt'
+            },
+
+            setSpatExt : function(lon,lat,level){
+                // set spatial map extent
+
+                function _mod360(x) { return x - Math.floor((x+180.0)/360.0)*360.0 ; }
+
+                // parse the number inputs
+                var mc = {
+                    lon : _mod360(parseFloat(lon)),
+                    lat : Math.max(-90.0,Math.min(+90.0,parseFloat(lat))),
+                    zoomLevel : Math.max(0,parseInt(level))
+                }
+
+                if ( isNaN(mc.lon) || isNaN(mc.lat) || isNaN(level) )
+                {
+                    console.error('Invalid map center: LAT='+lon+', LON='+lat+', LEVEL='+level);
+                    return ;
+                }
+
+                // set spatio-temporal extent
+                Communicator.mediator.trigger('map:center', mc);
+            },
+
+            setSpatTempExt : function(lon,lat,level,start,end){
+                // set spatio-temporal map extent
+
+                this.setSpatExt(lon,lat,level)
+
+                // parse time
+                var _start = Date.parse(start) ;
+                var _end = Date.parse(end) ;
+
+                if ( isNaN(_start) || isNaN(_end) ) {
+                    console.error('Invalid map time-extent: START='+start+', END='+end);
+                    return ;
+                }
+
+                // set temporal extent
+                Communicator.mediator.trigger('date:selection:change', {
+                    start: new Date(_start),
+                    end: new Date(_end)
+                });
             }
 		});
 

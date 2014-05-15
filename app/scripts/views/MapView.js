@@ -38,6 +38,8 @@ define(['backbone',
 				
 				onShow: function() {
 
+                    var mapView = this
+
 					this.tileManager = new OpenLayers.TileManager();
 					this.map = new OpenLayers.Map({
 						div: "map",
@@ -45,11 +47,21 @@ define(['backbone',
 						tileManager: this.tileManager
 					});
 
-					console.log("Created Map");
+					this.timeinterval = { start: null, end: null } ;
+
+					console.log("OpenLayer map created.");
 
 					//listen to moeveend event in order to keep router uptodate
 					this.map.events.register("moveend", this.map, function(data) {
-			            Communicator.mediator.trigger("router:setUrl", { x: data.object.center.lon, y: data.object.center.lat, l: data.object.zoom});
+
+                        console.log("moveend");
+
+                        Communicator.mediator.trigger("router:setUrl", {
+                            time: mapView.timeinterval,
+                            center: data.object.center,
+                            zoomLevel: data.object.zoom
+                        });
+
 			            Communicator.mediator.trigger("map:position:change", data.object.getExtent());
 			        });
 
@@ -64,16 +76,17 @@ define(['backbone',
 					this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
 					this.listenTo(Communicator.mediator, 'selection:changed', this.onSelectionChanged);
 					this.listenTo(Communicator.mediator, 'selection:bbox:changed', this.onSelectionBBoxChanged);
-					
-					
+					this.listenTo(Communicator.mediator, 'map:marker:set', this.setMarker);
+					this.listenTo(Communicator.mediator, 'map:marker:clearAll', this.clearMarkers);
 
 					Communicator.reqres.setHandler('map:get:extent', _.bind(this.onGetMapExtent, this));
 					Communicator.reqres.setHandler('get:selection:json', _.bind(this.onGetGeoJSON, this));
 
 					// Add layers for different selection methods
 					this.vectorLayer = new OpenLayers.Layer.Vector("Vector Layer");
+					this.markerLayer = new OpenLayers.Layer.Markers("Marker Layer");
 
-	                this.map.addLayers([this.vectorLayer]);
+	                this.map.addLayers([this.vectorLayer,this.markerLayer]);
 	                this.map.addControl(new OpenLayers.Control.MousePosition());
 
 	                this.drawControls = {
@@ -92,6 +105,41 @@ define(['backbone',
 	                        }
 	                    )
 	                };
+
+                    //create shared marker icons
+                    globals.icons = {}
+                    globals.icons.pinWhite = new OpenLayers.Icon( 'images/icons/marker_pin_white.png', {w:19,h:32}, {x:-9,y:-32})
+
+	                var that = this;
+
+	               OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+		                defaultHandlerOptions: {
+		                    'single': true,
+		                    'double': false,
+		                    'pixelTolerance': 0,
+		                    'stopSingle': false,
+		                    'stopDouble': false
+		                },
+
+		                initialize: function(options) {
+		                    this.handlerOptions = OpenLayers.Util.extend(
+		                        {}, this.defaultHandlerOptions
+		                    );
+		                    OpenLayers.Control.prototype.initialize.apply(
+		                        this, arguments
+		                    ); 
+		                    this.handler = new OpenLayers.Handler.Click(
+		                        that, {
+		                            'click': that.onMapClick
+		                        }, this.handlerOptions
+		                    );
+		                }
+
+		            });
+
+                    var click = new OpenLayers.Control.Click();
+	                this.map.addControl(click);
+	                click.activate();
 
 	                for(var key in this.drawControls) {
 	                    this.map.addControl(this.drawControls[key]);
@@ -129,8 +177,7 @@ define(['backbone',
 				    var mapmodel = globals.objects.get('mapmodel');
 				    this.map.setCenter(new OpenLayers.LonLat(mapmodel.get("center")), mapmodel.get("zoom") );
 				    return this;
-                },
-
+				},
 				//method to create layer depending on protocol
 				//setting possible description attributes
 				createLayer: function (layerdesc) {
@@ -207,7 +254,7 @@ define(['backbone',
 				},
 
 				centerMap: function(data){
-					this.map.setCenter(new OpenLayers.LonLat(data.x, data.y), data.l );
+					this.map.setCenter(new OpenLayers.LonLat(data.lon, data.lat), data.zoomLevel );
 				},
 
 				changeLayer: function(options){
@@ -291,6 +338,137 @@ define(['backbone',
 					}
 				},
 
+                setMarker: function(lonlat) {
+                    this.markerLayer.clearMarkers();
+                    var marker = new OpenLayers.Marker(lonlat,globals.icons.pinWhite.clone());
+                    //var marker = new OpenLayers.Marker(lonlat);
+                    this.markerLayer.addMarker(marker)
+                },
+
+                clearMarkers: function() {
+                    this.markerLayer.clearMarkers();
+                },
+
+                onMapClick: function(clickEvent){
+
+                    //TODO: move to global map configuration
+                    var map_crs_reverse_axes = true;
+
+                    // prepare getFeatureInfo request
+                    function getFetureInfoWMS13(info,prm){
+
+                        var format = "text/html" ;
+                        var maxFeatureCount = 1 ;
+
+                        var request = info.url +
+                            '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo' +
+                            '&LAYERS=' + info.id + '&QUERY_LAYERS=' + info.id +
+                            '&BBOX=' + prm.bbox.toBBOX(10,map_crs_reverse_axes) + '&CRS=' + prm.crs +
+                            '&TIME=' + getISODateTimeString(prm.time.start) + '/' + getISODateTimeString(prm.time.end) +
+                            '&HEIGHT=' + prm.size.h + '&WIDTH=' + prm.size.w +
+                            '&X=' + prm.xy.x + '&Y=' + prm.xy.y +
+                            '&INFO_FORMAT=' + format + '&FEATURE_COUNT=' + maxFeatureCount ;
+
+                        return {
+                            type: 'GET',
+                            url: request
+                        }
+                    }
+
+                    // get active data-layers
+                    var layers = globals.products.filter(function(model) { return model.get('visible'); });
+
+                    // request Parameters
+                    var prm = {
+                        time: {
+                            start: this.timeinterval.start,
+                            end: this.timeinterval.end
+                        },
+                        lonlat: this.map.getLonLatFromPixel(clickEvent.xy),
+                        bbox: this.map.getExtent(),
+                        crs: this.map.projection,
+                        xy: clickEvent.xy,
+                        size: {
+                            w: clickEvent.currentTarget.clientWidth,
+                            h: clickEvent.currentTarget.clientHeight
+                        }
+                    };
+
+                    // click lon/lat coordinates
+                    var lonlat = this.map.getLonLatFromPixel(clickEvent.xy);
+
+                    // display a marker (if at least one layer selected)
+                    if ( layers.length > 0 ) {
+                        // display marker only
+                        Communicator.mediator.trigger("map:marker:set",prm.lonlat);
+                    } else {
+                        // clear any displayed marker
+                        Communicator.mediator.trigger("map:marker:clearAll");
+                    }
+
+                    // trigger an event reseting the view 
+                    Communicator.mediator.trigger("info:start",{ lonlat: prm.lonlat, products: layers})
+
+                    for (var i=0 ; i<layers.length ; ++i ) {
+
+                        var layer = layers[i]
+                        var info = layers[i].get('info') ;
+
+                        switch ( info.protocol ) {
+
+                            case 'WMS': // WMS protocol - getFeatureInfo
+                                var request = getFetureInfoWMS13(info,prm) ;
+                                break ;
+
+                            /* TODO WPS
+                            case 'WPS': // WPS protocol - EOxServer specific
+                                request = getWPS(info,prm) ;
+                                break ;
+                            */
+
+                            default:
+                                console.error('Unsupported info protocol "'+info.protocol+'" ! LAYER="'+layer.get('view').id+'"');
+                                continue ;
+                        }
+
+                        // get the response
+
+                        $.ajax( _.extend(_.clone(request),{
+                            async: false,
+                            global: false,
+                            success: function(data,status_,xhr,dtype) {
+                                Communicator.mediator.trigger("info:response", {
+                                    lonlat: prm.lonlat, // click coordinates
+                                    protocol: info.protocol, // request protocol
+                                    request: request,   // request object
+                                    product: layer,     // data-layer (product) definition
+                                    data: data,         // response data
+                                    ctype: xhr.getResponseHeader('Content-Type') // HTTP response content-type
+                                });
+                            },
+                            error: function(xhr, status_, error) {
+                                var url = request.url ;
+                                var url_short = ( url.length > 40 ? url.substring(0, 37)+'...' : url ) ;
+                                console.log(xhr);
+                                $("#error-messages").append(
+                                    '<div class="alert alert-warning alert-danger">'+
+                                      '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+
+                                      '<strong>Warning!</strong> '
+                                      +'Info request failed!<br>'
+                                      +'ERROR: '+xhr.status+' '+xhr.statusText+'<br>'
+                                      +'URL: <a target="_blank" href="'+url+'">'+url_short+'</a><br>'+
+                                    '</div>'
+                                );
+                            }
+                        }));
+
+                    }
+
+                    // trigger an event iindicating end of the responses
+                    Communicator.mediator.trigger("info:stop")
+
+                },
+
 				onExportGeoJSON: function() {		
 					var geojsonstring = this.geojson.write(this.vectorLayer.features, true);
 					
@@ -328,6 +506,16 @@ define(['backbone',
 				},
 
 				onTimeChange: function (time) {
+
+					this.timeinterval = time;
+
+                    //update routes
+                    Communicator.mediator.trigger("router:setUrl", {
+                        time: this.timeinterval,
+                        center: this.map.center,
+                        zoomLevel: this.map.zoom
+                    });
+
 					var string = getISODateTimeString(time.start) + "/"+ getISODateTimeString(time.end);
 					
 					globals.products.each(function(product) {
