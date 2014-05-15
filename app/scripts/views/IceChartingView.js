@@ -24,7 +24,7 @@
 			events: {
 				'click #btn-draw-bbox':'onBBoxClick',
 				"click #btn-clear-bbox" : 'onClearClick',
-				"click #btn-saveconfig" : 'onSaveconfigClick',
+				"click #btn-savescenario" : 'onSavescenarioClick',
 				"click #btn-opensearch" : 'onOpensearchClick',
 				"change #txt-minx" : "onBBoxChange",
 				"change #txt-maxx" : "onBBoxChange",
@@ -65,7 +65,7 @@
 				this.$('#div-date-end input[type="text"]').datepicker('setDate', this.model.get('ToI').end);
 				// disable all button's
 				this.$("#btn-opensearch").attr("disabled", "disabled");
-				this.$("#btn-saveconfig").attr("disabled", "disabled");
+				this.$("#btn-savescenario").attr("disabled", "disabled");
 
 				$(document).on('touch click', '#div-date-begin .input-group-addon', function(e){
 				    $('input[type="text"]', $(this).parent()).focus();
@@ -93,14 +93,14 @@ htmlTemplate
 				$("#txt-maxy").val("");
 				// disable all button's
 				this.$("#btn-opensearch").attr("disabled", "disabled");
-				this.$("#btn-saveconfig").attr("disabled", "disabled");
+				this.$("#btn-savescenario").attr("disabled", "disabled");
 				// clear opensearch List
 				var $openserachList = root.$("#list-opensearch");
 				// remove item(s) out list
 				$openserachList.children().remove();
 			},
 	
-			onSaveconfigClick: function () {
+			onSavescenarioClick: function () {
 
 				var startDatestr = getISODateTimeString(this.model.get('ToI').start);
 				var endDatestr = getISODateTimeString(this.model.get('ToI').end);
@@ -122,11 +122,15 @@ htmlTemplate
 
 			onOpensearchClick: function () {
 
+				// status bar
 				$("#txt-opensearch").val("Searching....");
 
-				// Opensearch selection NLR or FEDEO
+				// Opensearch selection 0= NLR, 1= FEDEO/MERIS and 2= FEDEO/ASAR 
 				var selectionopensearch = $("#select-opensearch").val();
-		
+				// keywords for searching
+				var opensearchKeywords = $("#txt-opensearchkeywords").val();
+				if (opensearchKeywords.length == 0) { opensearchKeywords = 'MERIS+ASAR'; }
+
 				// add list to dialoag
 				var $openserachList = root.$("#list-opensearch");
 				// remove item(s) out list
@@ -139,9 +143,17 @@ htmlTemplate
 				var AoIStr = String(bbox.left.toFixed(3))+','+String(bbox.bottom.toFixed(3))+','+String(bbox.right.toFixed(3))+','+String(bbox.top.toFixed(3));
 				// set url parameters
 				var params = { bbox:AoIStr, startdate:startDatestr, endDate:endDatestr, maxrecord:50 };
+
+				// FEDEO search?
+				if (parseInt(selectionopensearch) == 1){
+					params.subject = "MER_FRS_1P";
+				} else if (parseInt(selectionopensearch) == 2){
+					params.subject = "ASA_IMM_1P";
+				}
 				var query_args = jQuery.param( params );
-				var url = '/opensearch/opensearch?'+query_args;
-				//var url = '/opensearch/opensearch?&startdate=2008-03-08T00:00:00.00Z&enddate=2008-03-08T23:99:99.00Z';
+
+				// proxy
+				var url = 'opensearch/opensearch?q='+opensearchKeywords+'&'+query_args;
 			
 				function getData() {
 					return $.ajax({
@@ -156,35 +168,42 @@ htmlTemplate
 
 					// get number of results					
 					var txtNumberResults = $(data).find("os\\:totalResults").text();
+					var intNumberResults = parseInt(txtNumberResults);
 
-					// init object
-					var jsonObj = [];
+					if ( intNumberResults > 0) {
+						// init object
+						var jsonObj = [];
 
-					// do for all entry's
-					$(data).find('entry').each(function(){
-						/* Parse the XML File */
-						var temp_obj = {};
-						temp_obj["coverageId"] = $(this).find('title').text();
-					    temp_obj["updated"] = $(this).find('updated').text();
-						jsonObj.push(temp_obj);
+						// do for all entry's
+						$(data).find('entry').each(function(){
+							/* Parse the XML File */
+							var temp_obj = {};
+							temp_obj["coverageId"] = $(this).find('title').text();
+							var temp_data = $(this).find('dc\\:date').text();
+							var arr =  temp_data.split('/');
+							temp_obj["period"] = arr[0] +'\n'+arr[1];
+							jsonObj.push(temp_obj);
 
-	 			   	});
+		 			   	});
 
-					if (jsonObj.length > 0){
-						// display number of search results
-						$("#txt-opensearch").val("Number of results: "+txtNumberResults);
+						if (jsonObj.length > 0){
+							// display number of search results
+							$("#txt-opensearch").val("Number of results: "+(txtNumberResults));
 
-						// add entry's to list
-						for (var i = 0; i < jsonObj.length; i++) {
-							var $html = $(SelectIcechartListItemTmpl(jsonObj[i]));
-							$openserachList.append($html);
-							$html.find("i").popover({
-								trigger: "hover",
-								html: true,
-								content: IcechartInfoTmpl(jsonObj[i]),
-								title: "Information",
-								placement: "bottom"
-							});
+							// add entry's to list
+							for (var i = 0; i < jsonObj.length; i++) {
+								var $html = $(SelectIcechartListItemTmpl(jsonObj[i]));
+								$openserachList.append($html);
+								$html.find("i").popover({
+									trigger: "hover",
+									html: true,
+									content: IcechartInfoTmpl(jsonObj[i]),
+									title: "Information",
+									placement: "bottom"
+								});
+							}
+						} else {
+							$("#txt-opensearch").val("No results");
 						}
 					} else {
 						$("#txt-opensearch").val("No results");
@@ -218,7 +237,7 @@ htmlTemplate
 					$("#txt-maxy").val(obj.bounds.top.toFixed(4));
 					// enable all button's
 					this.$("#btn-opensearch").removeAttr("disabled");
-					this.$("#btn-saveconfig").removeAttr("disabled");
+					this.$("#btn-savescenario").removeAttr("disabled");
 				}
 				
 			},
@@ -234,7 +253,7 @@ htmlTemplate
 				
 				// disable all button's
 				this.$("#btn-opensearch").attr("disabled", "disabled");
-				this.$("#btn-saveconfig").attr("disabled", "disabled");
+				this.$("#btn-savescenario").attr("disabled", "disabled");
 
 				if(!isNaN(values.left) && !isNaN(values.right) &&
 					!isNaN(values.bottom) && !isNaN(values.top) ) {
@@ -243,7 +262,7 @@ htmlTemplate
 						Communicator.mediator.trigger('selection:bbox:changed',values);
 						// enable all button's
 						this.$("#btn-opensearch").removeAttr("disabled");
-						this.$("#btn-saveconfig").removeAttr("disabled");
+						this.$("#btn-savescenario").removeAttr("disabled");
 					}
 				}
 			},

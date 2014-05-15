@@ -215,7 +215,7 @@
         "eventToRaise" : "dialog:open:orthoQuality"
       },
       {
-        "name" : "IceCharting",
+        "name" : "OpenSearch",
         "eventToRaise" : "dialog:open:iceCharting"
       },
       {

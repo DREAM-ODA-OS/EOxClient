@@ -1,6 +1,6 @@
 <div class="panel-heading">
     <button type="button" class="close"><i class="fa fa-times-circle"></i></button>
-    <h3 class="panel-title"><i class="fa fa-fw fa-download"></i>Ice Charting</h3>
+    <h3 class="panel-title"></i>OpenSearch</h3>
 </div>
 
 <div class="panel-body">
@@ -50,22 +50,31 @@
 					<i class="fa fa-calendar"></i>
 				</span>
 			  </div>
-
-			  <p>
-	  		    <h6>OpenSearch Selection</h6>
-				<select class="input-medium" id="select-opensearch">
-				  <option value="nlr" selected>NLR</option>
-				  <option value="fedeo">FEDEO</option>
-				</select>
-			  </p>
-
+			  <h6>OpenSearch options</h6>
+  			  <table>
+	 		    <tr>
+				  <div class="input-group">
+				 	<span class="input-group-addon fixed-sized-addon">Search Engine</span>
+					<select class="form-control" id="select-opensearch">
+				      <option value="0" selected>NLR</option>
+				  	  <option value="1">FEDEO MERIS</option>
+				  	  <option value="2">FEDEO ASAR</option>
+					</select>
+				  </div>
+			    </tr>
+				<tr>
+				  <div class="input-group">
+				    <span class="input-group-addon fixed-sized-addon">Keywords</span>
+				    <input type="text" class="form-control" placeholder="MERIS+ASAR" id="txt-opensearchkeywords">				
+					</tr>
+			  </table>
+			  <br>
 			  <button class="btn btn-block btn-primary" id="btn-opensearch"  href="#modal-start-opensearch"></i>OpenSearch</button>
-			  <button class="btn btn-block btn-primary" id="btn-saveconfig"  href="#modal-start-save"><i class="icon-white icon-save-alt"></i>Save configuration</button>
-
+			  <button class="btn btn-block btn-primary" id="btn-savescenario"></i>Save Scenario</button>
 			</td>
 			<td valign="top" width="70%">
-				<input type="text" class="form-control" id="txt-opensearch">
-				<div style="overflow:auto; height:360px" class="panel-body" id="list-opensearch"></div>
+				<input type="text" class="form-control" placeholder="Status bar" id="txt-opensearch">
+				<div style="overflow:auto; height:420px" class="panel-body" id="list-opensearch"></div>
 			</td>
 	 	</tr>
 	</table>
