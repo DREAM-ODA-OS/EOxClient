@@ -45,8 +45,7 @@
         'controller/AddLocalProductController',
         'controller/IngestionAdminT6Controller',
         'controller/OrthoQualityController',
-		'router',
-		'd3'
+		'router'
 	],
 
 	function( Backbone, Communicator, globals, DialogRegion, 
@@ -66,9 +65,6 @@
                 	hide: { effect: false, duration: 0 },
                 	show:{ effect: false, delay: 700}
                 });
-
-				var colors = d3.scale.category10();
-				var color_index = 0;
 
                 // Ingestion Engine options
 				globals.objects.add('ingestionEngineT5', config.ingestionEngineT5);
