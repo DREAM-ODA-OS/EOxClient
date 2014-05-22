@@ -41,6 +41,7 @@
 
 		var NavBarItemView = Backbone.Marionette.ItemView.extend({
             model: NavBarItemModel,
+            modelEvents: { 'change': 'render' },
             template: {
                 type: 'handlebars',
                 template: NavBarItemTmpl
@@ -50,9 +51,11 @@
             events: {'click': 'itemClicked'},
 
             itemClicked: function(){
-                Communicator.mediator.trigger(this.model.get('eventToRaise'), this);
+                if ( this.model.get('enabled') ) {
+                    Communicator.mediator.trigger(this.model.get('eventToRaise'), this);
+                }
             }
-            
+
 		});
 		return {'NavBarItemView' : NavBarItemView};
 	});

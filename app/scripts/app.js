@@ -120,10 +120,10 @@
 				// by the marionette collection view
 				if (config.navBarConfig) {
 
-					var navBarItemCollection = new models.NavBarCollection();
+					globals.navBarItems = new models.NavBarCollection();
 
 					_.each(config.navBarConfig.items, function(item){
-						navBarItemCollection.add(models.parseNavBarItemConfig(item));
+						globals.navBarItems.add(models.parseNavBarItemConfig(item));
 					}, this);
 
 					this.topBar.show(new views.NavBarCollectionView(
@@ -132,7 +132,7 @@
 							url: config.navBarConfig.url}),
 						className:"navbar navbar-inverse navbar-opaque navbar-fixed-top not-selectable",
 						itemView: views.NavBarItemView, tag: "div",
-						collection: navBarItemCollection}));
+						collection: globals.navBarItems}));
 
 				};
 
