@@ -88,11 +88,12 @@ module.exports = function (grunt) {
                 //hostname: 'localhost'
                 hostname: '0.0.0.0'
             },
-            proxies: [{
-            	context: '/opensearch', // the context of the data service
-		host: 'dream-nlr.nlr.nl', // wherever the data service is running
-		port: 80 // the port that the data service is running on
-	    }],
+	        proxies: [{
+	        	context: '/opensearch', // the context of the data service
+				//context: '/scenario', // the context of the data service
+				host: 'dream-nlr.nlr.nl', // wherever the data service is running
+				port: 80 // the port that the data service is running on
+			}],
             livereload: {
                 options: {
                     middleware: function (connect) {

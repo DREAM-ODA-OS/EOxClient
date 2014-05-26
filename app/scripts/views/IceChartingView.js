@@ -2,6 +2,9 @@
 	'use strict';
 
 	var root = this;
+	var query_args_scenario;
+	var query_args;
+	var opensearchKeywords;
 
 	root.define([
 		'backbone',
@@ -101,26 +104,36 @@ htmlTemplate
 			},
 	
 			onSavescenarioClick: function () {
-
-				var startDatestr = getISODateTimeString(this.model.get('ToI').start);
-				var endDatestr = getISODateTimeString(this.model.get('ToI').end);
-
-				var bbox = this.model.get("AoI").getBounds();
-
-				if(!isNaN(bbox.left) && !isNaN(bbox.right) &&
-					!isNaN(bbox.bottom) && !isNaN(bbox.top) ) {
-					
-					if ( !(bbox.left > bbox.right || bbox.bottom > bbox.top)){
-
- 						// make XML stream for batch configuration file.
-						var blob = new Blob([getConfigDataXML(startDatestr, endDatestr, bbox)], {type: "text/plain;charset=utf-8"});
-						saveAs(blob, "dream.xml");
-						
-					}
+				// proxy
+				// save scenario, same url as OpenSearch
+				var url = 'scenario/manage?request=newOpenSearchScenario&q='+opensearchKeywords+'&'+query_args;
+				// test url
+				//var url = 'scenario/manage?request=newOpenSearchScenario&bbox=48.397,42.590,53.770,46.567&startdate=2010-01-10T00:00:00&endDate=2011-01-10T00:00:00&maxrecord=10&subject=RRS'
+				
+				function getJsonData() {
+					return $.ajax({
+						url : url,
+						type: 'GET',
+						dataType: 'json'
+					});
 				}
+
+
+				function handleJsonData(data , textStatus, jqXHR ) {
+					
+					var obj = $.parseJSON( JSON.stringify(data) ); 
+					// status bar response example from request: {"status":0,"ncn_id":"scid17"}
+					$("#txt-opensearch").val("Scenario-id: "+obj.ncn_id);
+				}
+
+				// get scenario-id from NLR
+				getJsonData().done(handleJsonData);
+				
 			},
 
 			onOpensearchClick: function () {
+				// disable savescenario
+				this.$("#btn-savescenario").attr("disabled", "disabled");
 
 				// status bar
 				$("#txt-opensearch").val("Searching....");
@@ -128,9 +141,8 @@ htmlTemplate
 				// Opensearch selection 0= NLR, 1= FEDEO/MERIS and 2= FEDEO/ASAR 
 				var selectionopensearch = $("#select-opensearch").val();
 				// keywords for searching
-				var opensearchKeywords = $("#txt-opensearchkeywords").val();
+				opensearchKeywords = $("#txt-opensearchkeywords").val();
 				if (opensearchKeywords.length == 0) { opensearchKeywords = 'MERIS+ASAR'; }
-
 				// add list to dialoag
 				var $openserachList = root.$("#list-opensearch");
 				// remove item(s) out list
@@ -150,7 +162,7 @@ htmlTemplate
 				} else if (parseInt(selectionopensearch) == 2){
 					params.subject = "ASA_IMM_1P";
 				}
-				var query_args = jQuery.param( params );
+				query_args = jQuery.param( params );
 
 				// proxy
 				var url = 'opensearch/opensearch?q='+opensearchKeywords+'&'+query_args;
@@ -189,6 +201,8 @@ htmlTemplate
 						if (jsonObj.length > 0){
 							// display number of search results
 							$("#txt-opensearch").val("Number of results: "+(txtNumberResults));
+							// enable savescenario
+							root.$("#btn-savescenario").removeAttr("disabled");
 
 							// add entry's to list
 							for (var i = 0; i < jsonObj.length; i++) {
@@ -237,7 +251,7 @@ htmlTemplate
 					$("#txt-maxy").val(obj.bounds.top.toFixed(4));
 					// enable all button's
 					this.$("#btn-opensearch").removeAttr("disabled");
-					this.$("#btn-savescenario").removeAttr("disabled");
+					//this.$("#btn-savescenario").removeAttr("disabled");
 				}
 				
 			},
@@ -262,7 +276,7 @@ htmlTemplate
 						Communicator.mediator.trigger('selection:bbox:changed',values);
 						// enable all button's
 						this.$("#btn-opensearch").removeAttr("disabled");
-						this.$("#btn-savescenario").removeAttr("disabled");
+						//this.$("#btn-savescenario").removeAttr("disabled");
 					}
 				}
 			},

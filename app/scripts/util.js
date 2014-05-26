@@ -50,6 +50,13 @@ var getISODateTimeString = function(date) {
     + padLeft(String(date.getUTCSeconds()), "0", 2) + ".000Z";
 };
 
+var getDateTimeString = function(date) {
+  return getISODateString(date)
+    + padLeft(String(date.getUTCHours()), "0", 2) + ":"
+    + padLeft(String(date.getUTCMinutes()), "0", 2) + ":"
+    + padLeft(String(date.getUTCSeconds()), "0", 2);
+};
+
 var htmlTemplate = function(selector, values) {
   var tmplString = $(selector).html();
   return _.template(tmplString, values);
