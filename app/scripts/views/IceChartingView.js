@@ -123,7 +123,11 @@ htmlTemplate
 					
 					var obj = $.parseJSON( JSON.stringify(data) ); 
 					// status bar response example from request: {"status":0,"ncn_id":"scid17"}
-					$("#txt-opensearch").val("Scenario-id: "+obj.ncn_id);
+					if (obj.status == 0){
+						$("#txt-opensearch").val("Scenario-id: "+obj.ncn_id);
+					} else {
+						$("#txt-opensearch").val("Scenario error: "+obj.status);
+					}
 				}
 
 				// get scenario-id from NLR
