@@ -216,7 +216,26 @@
       "info": {
         "id": "MERIS_FRS_L1_ALL_view_outlines"
       }
-    }
+    },
+    {
+      "name": "SPOT 4",
+      "visible": false,
+      "timeSlider": true,
+      "timeSliderProtocol": "WPS",
+      "view": {
+        "id": "SPOT4_View",
+        "protocol": "WMS",
+        "urls": [
+            "https://demo.v-manip.eox.at/browse/ows"
+        ],
+        "style": "default"
+      },
+        "download": {
+          "id": "SPOT4_View",
+          "protocol": "EOWCS",
+          "url": "https://demo.v-manip.eox.at/unsec/ows"
+        }
+      }
   ]
 
 }
