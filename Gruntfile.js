@@ -193,7 +193,7 @@ module.exports = function (grunt) {
                     //generateSourceMaps: true,
                     // required to support SourceMaps
                     // http://requirejs.org/docs/errors.html#sourcemapcomments
-                    preserveLicenseComments: false,
+                    preserveLicenseComments: true,
                     useStrict: true,
                     wrap: true
                     //uglify2: {} // https://github.com/mishoo/UglifyJS2
@@ -292,6 +292,7 @@ module.exports = function (grunt) {
                   src: ['**/*.js'], // Actual pattern(s) to match.
                   dest: '<%= yeoman.dist %>/scripts/',   // Destination path prefix.
                   ext: '.js',   // Dest filepaths will have this extension.
+                  preserveComments: 'all',
                 },
               ]
             }

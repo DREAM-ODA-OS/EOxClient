@@ -45,6 +45,7 @@
         'controller/AddLocalProductController',
         'controller/IngestionAdminT6Controller',
         'controller/OrthoQualityController',
+        'vendor/mwps',
 		'router'
 	],
 
