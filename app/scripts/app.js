@@ -247,6 +247,10 @@
 				});
 
 				$(document).ajaxError(function( event, request, settings ) {
+					if(settings.suppressErrors) {
+				        return;
+				    }
+				    
 					var statuscode = "";
 					if (request.status != 0)
 						statuscode =  '<br>Status Code: '+ request.status;
