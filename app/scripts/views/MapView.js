@@ -375,6 +375,22 @@ define(['backbone',
                         }
                     }
 
+                    // prepare getFeatureInfo request
+                    function getCoverageInfoWPS10(info, prm){
+
+                        var request = info.url +
+                            "?SERVICE=WPS&VERSION=1.0.0&REQUEST=Execute&IDENTIFIER=getCoverageInfo" +
+                            "&RawDataOutput=info&DATAINPUTS=collection%3D" + info.id +
+                            "%3Bbegin_time%3D" + getISODateTimeString(prm.time.start) +
+                            "%3Bend_time%3D" + getISODateTimeString(prm.time.end) +
+                            "%3Blongitude%3D" + prm.lonlat.lon + "%3Blatitude%3D" + prm.lonlat.lat
+
+                        return {
+                            type: 'GET',
+                            url: request
+                        }
+                    }
+
                     // get active data-layers
                     var layers = globals.products.filter(function(model) { return model.get('visible'); });
 
@@ -413,22 +429,20 @@ define(['backbone',
 
                         var layer = layers[i]
                         var info = layers[i].get('info') ;
+                        var request = null;
 
                         switch ( info.protocol ) {
-
                             case 'WMS': // WMS protocol - getFeatureInfo
-                                var request = getFetureInfoWMS13(info,prm) ;
-                                break ;
+                                request = getFetureInfoWMS13(info,prm);
+                                break;
 
-                            /* TODO WPS
                             case 'WPS': // WPS protocol - EOxServer specific
-                                request = getWPS(info,prm) ;
-                                break ;
-                            */
+                                request = getCoverageInfoWPS10(info, prm);
+                                break;
 
                             default:
                                 console.error('Unsupported info protocol "'+info.protocol+'" ! LAYER="'+layer.get('view').id+'"');
-                                continue ;
+                                continue;
                         }
 
                         // get the response
