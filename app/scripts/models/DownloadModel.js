@@ -31,8 +31,8 @@
 	root.define(['backbone','communicator'],
 	function( Backbone, Communicator ) {
 		var DownloadModel = Backbone.Model.extend({
-			ToI:{},			// Time of interes
-			AoI:[], 		// Area of Interest
+			ToI: null,		// Time of interes
+			AoI: null, 		// Area of Interest
 			products: {} 	// Selected products
 		
 		});

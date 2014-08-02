@@ -45,6 +45,14 @@
 		    		handle: '.panel-heading'
 		    	});
 
+                var aoi = this.model.get("AoI")
+                if (aoi){
+                    $("#txt-minx").val(aoi.left);
+                    $("#txt-maxx").val(aoi.right);
+                    $("#txt-miny").val(aoi.bottom);
+                    $("#txt-maxy").val(aoi.top);
+                }
+
 		    	this.$('#div-date-begin input[type="text"]').datepicker({autoclose: true, format: "dd/mm/yyyy", keyboardNavigation: false});
 		    	this.$('#div-date-begin input[type="text"]').datepicker('update', this.model.get('ToI').start);
 		    	this.$('#div-date-begin input[type="text"]').datepicker('setDate', this.model.get('ToI').start);
