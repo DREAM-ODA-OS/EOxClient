@@ -108,7 +108,7 @@
           } //TODO: Check what to set if timeslider not activated
 
           options.subsetCRS = "http://www.opengis.net/def/crs/EPSG/0/4326";
-          var bbox = this.model.get("AoI").getBounds();
+          var bbox = this.model.get("AoI");
           options.subsetX = [bbox.left, bbox.right];
           options.subsetY = [bbox.bottom, bbox.top];
 
@@ -178,7 +178,7 @@
         var $downloads = $("#div-downloads"),
             options = {};
 
-        var bbox = this.model.get("AoI").getBounds();
+        var bbox = this.model.get("AoI");
         options.subsetX = [bbox.left, bbox.right];
         options.subsetY = [bbox.bottom, bbox.top];
 
@@ -188,6 +188,7 @@
 
         // apply mask parameter if polygon is not a square
         // (described by 5 points, first and last the same)
+        /*
         var components = this.model.get("AoI").components[0].components;
         if(components.length>5){
           var coords = [];
@@ -197,7 +198,7 @@
           });
           options.mask = coords.join(" ");
         }
-
+        */
 
         this.$('input[type="checkbox"]').each(_.bind(function(index) {
           if ($('input[type="checkbox"]')[index].checked){
