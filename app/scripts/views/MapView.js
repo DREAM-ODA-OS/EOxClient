@@ -355,7 +355,7 @@ define(['backbone',
                     var map_crs_reverse_axes = true;
 
                     // prepare getFeatureInfo request
-                    function getFetureInfoWMS13(info,prm){
+                    function getFeatureInfoWMS13(info,prm){
 
                         var format = "text/html" ;
                         var maxFeatureCount = 1 ;
@@ -380,7 +380,7 @@ define(['backbone',
 
                         var request = info.url +
                             "?SERVICE=WPS&VERSION=1.0.0&REQUEST=Execute&IDENTIFIER=getCoverageInfo" +
-                            "&RawDataOutput=info&DATAINPUTS=collection%3D" + info.id +
+                            "&RawDataOutput=info&DATAINPUTS=identifier%3D" + info.id +
                             "%3Bbegin_time%3D" + getISODateTimeString(prm.time.start) +
                             "%3Bend_time%3D" + getISODateTimeString(prm.time.end) +
                             "%3Blongitude%3D" + prm.lonlat.lon + "%3Blatitude%3D" + prm.lonlat.lat
@@ -433,7 +433,7 @@ define(['backbone',
 
                         switch ( info.protocol ) {
                             case 'WMS': // WMS protocol - getFeatureInfo
-                                request = getFetureInfoWMS13(info,prm);
+                                request = getFeatureInfoWMS13(info,prm);
                                 break;
 
                             case 'WPS': // WPS protocol - EOxServer specific
