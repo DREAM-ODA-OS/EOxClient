@@ -92,7 +92,7 @@
                 var options = { name: this.model.get('name'), isBaseLayer: isBaseLayer, visible: evt.target.checked };
                 if( !isBaseLayer && evt.target.checked ){
                 	var layer = globals.products.find(function(model) { return model.get('name') == options.name; });
-                    if (layer != -1) {
+                    if (layer != -1  && !(typeof layer === 'undefined')) {
                     	var url = layer.get('view').urls[0]+"?";
 
                     	if (url.indexOf('https') > -1){
@@ -108,7 +108,7 @@
 							    suppressErrors: true,
 							    xhrFields: {
 							      withCredentials: true
-							   },
+							   	},
 							    success: function(xml, textStatus, xhr) {
 							        Communicator.mediator.trigger('map:layer:change', options);
 							    },
@@ -138,9 +138,13 @@
 	                    }else{
 	                    	Communicator.mediator.trigger('map:layer:change', options);
 	                    }
-                    }
+                    }else if (typeof layer === 'undefined'){
+ 	                	Communicator.mediator.trigger('map:layer:change', options);
+ 	                }
                 } else if (!evt.target.checked){
                 	Communicator.mediator.trigger('map:layer:change', options);
+        	 	} else if (isBaseLayer && evt.target.checked){
+	             	Communicator.mediator.trigger('map:layer:change', options);
                 }
             },
 
