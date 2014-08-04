@@ -83,6 +83,10 @@ hr {
   margin: 1em 0;
 }
 
+.italic {
+    font-style: italic;
+}
+
 .not-selectable {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -250,11 +254,11 @@ button[active=active] {
  * Selection Manager, Download Manager
  */
 .selectionManager, .download {
-  width: 50em;
+  width: 60em;
   top: 10em;
   left: 50%;
   margin: 0 0 0 -25em;
-  font-size: 1em;
+  font-size: .9em;
   position: absolute;
 }
 .selectionManager .input-group {
@@ -265,16 +269,37 @@ button[active=active] {
   float: right;
 }
 
-.selectionManager .panel-body, .download .panel-body {
+.selectionManager .panel-body {
   max-height: 15em;
   overflow: auto;
 }
+
+.download .panel-body {
+  height: 20em;
+  overflow: auto;
+  width: 35em;
+}
+
+.download .panel-info {
+  width: 24em;
+}
+
+#download-info-frame {
+    width: 27em;
+    height: 22em;
+    font-size: .9em;
+}
+
+#download-alert {
+    color:red;
+}
+
 
 /*
  * Layer Info Panel
  */
 .layer-info {
-    width: 24em;
+    width: 25em;
     top: 10em;
     right: 3em;
     font-size: .9em;
