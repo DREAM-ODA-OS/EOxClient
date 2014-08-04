@@ -89,7 +89,7 @@ var getCoverageXML = function(coverageid, options) {
                 "<wcs:TrimHigh>" + options.subsetY[1] + "</wcs:TrimHigh></wcs:DimensionTrim>");
   }
   
-  if (options.outputCRS) {
+  if (options.outputCRS &&(options.coverageSubtype == "RectifiedDataset")) {
     /* the crs extension is not released. Mapserver expects a <wcs:OutputCRS> 
      * in the root. Will stick to that atm, but requires a change in the future.
     */
