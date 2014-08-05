@@ -333,7 +333,8 @@ module.exports = function (grunt) {
                         'bower_components/backbone.marionette.handlebars/backbone.marionette.handlebars.min.js',
                         'bower_components/bootstrap/dist/*/*',
                         'bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js',
-                        'bower_components/lm.js/lm.js'
+                        'bower_components/lm.js/lm.js',
+                        'scripts/vendor/theme/default/style.css'
                     ]
                 },{
                     expand: true,
