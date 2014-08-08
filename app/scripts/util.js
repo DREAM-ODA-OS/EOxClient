@@ -25,6 +25,17 @@
 // THE SOFTWARE.
 //-------------------------------------------------------------------------------
 
+strHash = function(s) {
+  var h = 0, i, l = s.length; 
+  for (i = 0; i < l; ++i) {
+    h = ((h << 5) - h) + s.charCodeAt(i);
+    h &= 0x7fffffff ; // mask to non-negative signed 32bit integer
+  }
+  h = Number(h).toString(16);
+  while (h.length < 8) { h = "0" + h; }
+  return h;
+};
+
 
 var padLeft = function(str, pad, size) {
   while (str.length < size) {

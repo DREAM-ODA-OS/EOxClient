@@ -103,35 +103,35 @@
               switch (product.get("timeSliderProtocol")){
                 case "WMS":
                   this.slider.addDataset({
-                    id: product.get('view').id,
+                    id: "id"+strHash(product.get('view').id),
                     color: product.get('color'),
                     data: new TimeSlider.Plugin.WMS({
                       url: product.get('view').urls[0],
                       eoid: product.get('view').id,
-                      dataset: product.get('view').id
+                      dataset: "id"+strHash(product.get('view').id)
                     })
                   });
                   break;
                 case "EOWCS":
                   this.slider.addDataset({
-                    id: product.get('download').id,
+                    id: "id"+strHash(product.get('download').id),
                     color: product.get('color'),
                     data: new TimeSlider.Plugin.EOWCS({
                         url: product.get('download').url,
                         eoid: product.get('download').id,
-                        dataset: product.get('download').id
+                        dataset: "id"+strHash(product.get('download').id)
                      })
                   });
                   break;
                 case "WPS":
                   var extent = Communicator.reqres.request('map:get:extent');
                   this.slider.addDataset({
-                    id: product.get('view').id,
+                    id: "id"+strHash(product.get('download').id),
                     color: product.get('color'),
                     data: new TimeSlider.Plugin.WPS({
                         url: product.get('download').url,
                         eoid: product.get('download').id,
-                        dataset: product.get('view').id ,
+                        dataset: "id"+strHash(product.get('download').id),
                         bbox: [extent.left, extent.bottom, extent.right, extent.top]
                      })
                   });
