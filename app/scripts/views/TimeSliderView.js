@@ -101,6 +101,7 @@
             if(options.visible && product.get('timeSlider')){
 
               switch (product.get("timeSliderProtocol")){
+
                 case "WMS":
                   this.slider.addDataset({
                     id: "id"+strHash(product.get('view').id),
@@ -111,7 +112,9 @@
                       dataset: "id"+strHash(product.get('view').id)
                     })
                   });
+                  this.active_products.push("id"+strHash(product.get('view').id));
                   break;
+
                 case "EOWCS":
                   this.slider.addDataset({
                     id: "id"+strHash(product.get('download').id),
@@ -122,7 +125,9 @@
                         dataset: "id"+strHash(product.get('download').id)
                      })
                   });
+                  this.active_products.push("id"+strHash(product.get('download').id));
                   break;
+
                 case "WPS":
                   var extent = Communicator.reqres.request('map:get:extent');
                   this.slider.addDataset({
@@ -135,23 +140,35 @@
                         bbox: [extent.left, extent.bottom, extent.right, extent.top]
                      })
                   });
-                  this.activeWPSproducts.push(product.get('view').id);
+                  this.activeWPSproducts.push("id"+strHash(product.get('download').id));
+                  this.active_products.push("id"+strHash(product.get('download').id));
                   // For some reason updateBBox is needed, altough bbox it is initialized already.
                   // Withouth this update the first time activating a layer after the first map move
                   // the bbox doesnt seem to be defined in the timeslider library and the points shown are wrong
-                  this.slider.updateBBox([extent.left, extent.bottom, extent.right, extent.top], product.get('download').id);
+                  this.slider.updateBBox([extent.left, extent.bottom, extent.right, extent.top], "id"+strHash(product.get('download').id));
                   break;
               }
-              this.active_products.push(product.get('view').id);
+              
               this.slider.show();
             }else{
-              this.slider.removeDataset(product.get('view').id);
-              if (this.activeWPSproducts.indexOf(product.get('view').id)!=-1)
-                this.activeWPSproducts.splice(this.activeWPSproducts.indexOf(product.get('view').id), 1);
+              if (product.get("timeSliderProtocol") == "WMS"){
 
-              if (this.active_products.indexOf(product.get('view').id)!=-1)
-                this.active_products.splice(this.active_products.indexOf(product.get('view').id), 1);
+                this.slider.removeDataset("id"+strHash(product.get('view').id));
 
+                if (this.active_products.indexOf("id"+strHash(product.get('view').id))!=-1)
+                  this.active_products.splice(this.active_products.indexOf("id"+strHash(product.get('view').id)), 1);
+
+              }else{
+
+                this.slider.removeDataset("id"+strHash(product.get('download').id));
+
+                if (this.activeWPSproducts.indexOf("id"+strHash(product.get('download').id))!=-1)
+                  this.activeWPSproducts.splice(this.activeWPSproducts.indexOf("id"+strHash(product.get('download').id)), 1);
+
+                if (this.active_products.indexOf("id"+strHash(product.get('download').id))!=-1)
+                  this.active_products.splice(this.active_products.indexOf("id"+strHash(product.get('download').id)), 1);
+              }
+              
               if (this.active_products.length == 0)
                 this.slider.hide();
             }
