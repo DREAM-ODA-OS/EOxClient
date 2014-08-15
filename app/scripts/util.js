@@ -90,12 +90,12 @@ var getCoverageXML = function(coverageid, options) {
     options.subsetY = [options.bbox[1], options.bbox[3]];
   }
   if (options.subsetX) {
-    params.push('<wcs:DimensionTrim><wcs:Dimension crs="' + subsetCRS + '">x</wcs:Dimension>' +
+    params.push('<wcs:DimensionTrim><wcs:Dimension>x</wcs:Dimension>' +
                 "<wcs:TrimLow>" + options.subsetX[0] + "</wcs:TrimLow>" +
                 "<wcs:TrimHigh>" + options.subsetX[1] + "</wcs:TrimHigh></wcs:DimensionTrim>");
   }
   if (options.subsetY) {
-    params.push('<wcs:DimensionTrim><wcs:Dimension crs="' + subsetCRS + '">y</wcs:Dimension>' +
+    params.push('<wcs:DimensionTrim><wcs:Dimension>y</wcs:Dimension>' +
                 "<wcs:TrimLow>" + options.subsetY[0] + "</wcs:TrimLow>" +
                 "<wcs:TrimHigh>" + options.subsetY[1] + "</wcs:TrimHigh></wcs:DimensionTrim>");
   }
@@ -107,15 +107,16 @@ var getCoverageXML = function(coverageid, options) {
     //extension.push("<wcscrs:outputCrs>" + options.outputCRS + "</wcscrs:outputCrs>");
     params.push("<wcs:OutputCrs>" + options.outputCRS + "</wcs:OutputCrs>");
   }
-
-  // raises an exception in MapServer
-  //extension.push("<wcscrs:subsettingCrs>" + subsetCRS + "</wcscrs:subsettingCrs>");
   
   if (options.mask) {
     extension.push("<wcsmask:polygonMask>" + options.mask + "</wcsmask:polygonMask>");
   }
   if (options.multipart) {
     params.push("<wcs:mediaType>multipart/related</wcs:mediaType>");
+  }
+
+  if ((options.subsetX)||(options.subsetY)) {
+    params.push('<wcs:Extension><wcscrs:subsettingCrs>'+subsetCRS+'</wcscrs:subsettingCrs></wcs:Extension>');
   }
 
   if (extension.length > 0) {
