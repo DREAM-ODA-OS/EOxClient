@@ -3,9 +3,9 @@
   "products": [
       {
         "name": "Spot 4 - Take 5 - L1C",
+        "description": "Collection of SPOT 4 level 1C products acquired by the Take Five campaign in 2013.",
         "visible": false,
         "timeSlider": true,
-        "color":"#429bc9",
         "view": {
           "id": "Spot4Take5_N1C_RGB_view",
           "protocol": "WMS",
@@ -25,9 +25,9 @@
       },
       {
         "name": "Spot 4 - Take 5 - L2A (pente)",
+        "description": "Collection of SPOT 4 level 2A products (atmospheric and terrain corrections applied) acquired by the Take Five campaing in 2013.",
         "visible": false,
         "timeSlider": true,
-        "color":"#f4a720",
         "view": {
           "id": "Spot4Take5_N2A_RGB_view",
           "protocol": "WMS",
@@ -47,9 +47,9 @@
       },
       {
         "name": "CESBIO Landsat 5",
+        "description": "Collection of Landsat 5 level 2A products (atmospheric and terrain corrections applied).",
         "visible": false,
         "timeSlider": true,
-        "color":"green",
         "view": {
           "id": "Landsat5_RGB_view",
           "protocol": "WMS",
@@ -69,9 +69,9 @@
       },
       {
         "name": "CESBIO Landsat 7",
+        "description": "Collection of Landsat 7 level 2A products (atmospheric and terrain corrections applied).",
         "visible": false,
         "timeSlider": true,
-        "color":"blue",
         "view": {
           "id": "Landsat7_RGB_view",
           "protocol": "WMS",
@@ -91,6 +91,7 @@
       },
       {
         "name": "GISAT Landsat (EUSC-B)",
+        "description": "Collection of Landsat level 1C products over the Czech Republic.",
         "visible": false,
         "timeSlider": true,
         "color":"red",
@@ -115,7 +116,6 @@
       "name": "MERIS FR L1 (EUSC-A)",
       "visible": false,
       "timeSlider": true,
-      "color":"cyan",
       "view": {
         "id": "MERIS_FR__L1_EUSC_view",
         "protocol": "WMS",
@@ -137,7 +137,6 @@
       "name": "ASAR IMM L1 (NLR)",
       "visible": false,
       "timeSlider": true,
-      "color":"black",
       "view": {
         "id": "ASAR_IMM_L1_view",
         "protocol": "WMS",
@@ -159,7 +158,6 @@
       "name": "MERIS FRS L1 (NLR)",
       "visible": false,
       "timeSlider": true,
-      "color":"purple",
       "view": {
         "id": "MERIS_FRS_L1_view",
         "protocol": "WMS",
@@ -181,7 +179,6 @@
       "name": "ASAR IMM L1 - ALL (previews only)",
       "visible": false,
       "timeSlider": true,
-      "color":"black",
       "view": {
         "id": "ASAR_IMM_L1_ALL_view",
         "protocol": "WMS",
@@ -203,7 +200,6 @@
       "name": "MERIS FRS L1 - ALL (previews only)",
       "visible": false,
       "timeSlider": true,
-      "color":"purple",
       "view": {
         "id": "MERIS_FRS_L1_ALL_view",
         "protocol": "WMS",
@@ -220,7 +216,26 @@
       "info": {
         "id": "MERIS_FRS_L1_ALL_view_outlines"
       }
-    }
+    },
+    {
+      "name": "SPOT 4",
+      "visible": false,
+      "timeSlider": true,
+      "timeSliderProtocol": "WPS",
+      "view": {
+        "id": "SPOT4_View",
+        "protocol": "WMS",
+        "urls": [
+            "https://demo.v-manip.eox.at/browse/ows"
+        ],
+        "style": "default"
+      },
+        "download": {
+          "id": "SPOT4_View",
+          "protocol": "EOWCS",
+          "url": "https://demo.v-manip.eox.at/unsec/ows"
+        }
+      }
   ]
 
 }

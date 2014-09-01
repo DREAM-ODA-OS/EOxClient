@@ -190,6 +190,10 @@
     {
       "name": "viewContent",
       "class": ""
+    },
+    {
+      "name": "info",
+      "class": ""
     }
   ],
 

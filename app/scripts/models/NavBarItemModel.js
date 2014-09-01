@@ -32,16 +32,22 @@
 	function( Backbone, Communicator ) {
 
 		var NavBarItemModel = Backbone.Model.extend({
+			id: null,
+			type: null,
 			name: "",
 			icon: "",
 			content: "",
+			enabled: true,
 			eventToRaise: ""
 		});
 
         function parseNavBarItemConfig(obj) {
             return new NavBarItemModel({
+                id: obj.id ? obj.id : null,
+                type: obj.type ? obj.type : null,
                 name: obj.name,
                 icon: obj.icon,
+                enabled: typeof obj.enabled === 'undefined' ? true : Boolean(obj.enabled),
                 eventToRaise: obj.eventToRaise
             });
         }

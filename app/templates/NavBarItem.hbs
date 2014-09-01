@@ -1,4 +1,9 @@
+{{#if enabled }}
 <a class="tab-header">
 	<i class="fa fa-fw {{icon}}"></i> {{name}}
 </a>
-
+{{else}}
+<span class="tab-header navbar-text">
+    <i class="fa fa-fw {{icon}}"></i> {{name}}
+</span>
+{{/if}}

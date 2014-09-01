@@ -31,7 +31,8 @@
 	var root = this;
 
 	root.define([
-		'backbone'
+		'backbone',
+		'd3'
 	],
 
 	function( Backbone ) { // initializer
@@ -84,6 +85,12 @@
 
 		}); /* end of Backbone.Model.extend() */
 
+        var autoColor = {
+            colors : d3.scale.category10(),
+            index : 0,
+            getColor: function () { return this.colors(this.index++) }
+        }
+
         function parseProductLayer(obj) {
 
             if (! obj.info ) { obj.info = {}; }
@@ -102,8 +109,8 @@
                 visible: obj.visible,
                 timeSlider: obj.timeSlider,
                 // Default to WMS if no protocol is defined (allowed protocols: WMS|EOWCS|WPS)
-                timeSliderProtocol: (obj.timeSliderProtocol) ? obj.timeSliderProtocol : 'WMS',
-                color:  (obj.color) ? obj.color : colors(color_index++),
+                timeSliderProtocol: obj.timeSliderProtocol ? obj.timeSliderProtocol : 'WMS',
+                color:  obj.color ? obj.color : autoColor.getColor() ,
                 time: obj.time,
                 opacity: 1,
                 view:{

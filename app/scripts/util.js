@@ -25,6 +25,17 @@
 // THE SOFTWARE.
 //-------------------------------------------------------------------------------
 
+strHash = function(s) {
+  var h = 0, i, l = s.length; 
+  for (i = 0; i < l; ++i) {
+    h = ((h << 5) - h) + s.charCodeAt(i);
+    h &= 0x7fffffff ; // mask to non-negative signed 32bit integer
+  }
+  h = Number(h).toString(16);
+  while (h.length < 8) { h = "0" + h; }
+  return h;
+};
+
 
 var padLeft = function(str, pad, size) {
   while (str.length < size) {
@@ -86,32 +97,33 @@ var getCoverageXML = function(coverageid, options) {
     options.subsetY = [options.bbox[1], options.bbox[3]];
   }
   if (options.subsetX) {
-    params.push('<wcs:DimensionTrim><wcs:Dimension crs="' + subsetCRS + '">x</wcs:Dimension>' +
+    params.push('<wcs:DimensionTrim><wcs:Dimension>x</wcs:Dimension>' +
                 "<wcs:TrimLow>" + options.subsetX[0] + "</wcs:TrimLow>" +
                 "<wcs:TrimHigh>" + options.subsetX[1] + "</wcs:TrimHigh></wcs:DimensionTrim>");
   }
   if (options.subsetY) {
-    params.push('<wcs:DimensionTrim><wcs:Dimension crs="' + subsetCRS + '">y</wcs:Dimension>' +
+    params.push('<wcs:DimensionTrim><wcs:Dimension>y</wcs:Dimension>' +
                 "<wcs:TrimLow>" + options.subsetY[0] + "</wcs:TrimLow>" +
                 "<wcs:TrimHigh>" + options.subsetY[1] + "</wcs:TrimHigh></wcs:DimensionTrim>");
   }
   
-  if (options.outputCRS) {
+  if (options.outputCRS &&(options.coverageSubtype == "RectifiedDataset")) {
     /* the crs extension is not released. Mapserver expects a <wcs:OutputCRS> 
      * in the root. Will stick to that atm, but requires a change in the future.
     */
     //extension.push("<wcscrs:outputCrs>" + options.outputCRS + "</wcscrs:outputCrs>");
     params.push("<wcs:OutputCrs>" + options.outputCRS + "</wcs:OutputCrs>");
   }
-
-  // raises an exception in MapServer
-  //extension.push("<wcscrs:subsettingCrs>" + subsetCRS + "</wcscrs:subsettingCrs>");
   
   if (options.mask) {
     extension.push("<wcsmask:polygonMask>" + options.mask + "</wcsmask:polygonMask>");
   }
   if (options.multipart) {
     params.push("<wcs:mediaType>multipart/related</wcs:mediaType>");
+  }
+
+  if ((options.subsetX)||(options.subsetY)) {
+    params.push('<wcs:Extension><wcscrs:subsettingCrs>'+subsetCRS+'</wcscrs:subsettingCrs></wcs:Extension>');
   }
 
   if (extension.length > 0) {

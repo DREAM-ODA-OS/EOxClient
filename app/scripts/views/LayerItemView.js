@@ -31,11 +31,15 @@
 	root.define([
 		'backbone',
 		'communicator',
+		'views/AuthView',
+		'models/AuthModel',
 		'globals',
+		'app',
 		'hbs!tmpl/BulletLayer',
+		'hbs!tmpl/iFrame',
 		'underscore'
 	],
-	function( Backbone, Communicator, globals, BulletLayerTmpl) {
+	function( Backbone, Communicator, av, am, globals, App, BulletLayerTmpl, iFrameTmpl) {
 		var LayerItemView = Backbone.Marionette.ItemView.extend({
 			tagName: "li",
 			events: {
@@ -86,22 +90,62 @@
                 if (this.model.get('view').isBaseLayer)
                 	isBaseLayer = true;
                 var options = { name: this.model.get('name'), isBaseLayer: isBaseLayer, visible: evt.target.checked };
+                if( !isBaseLayer && evt.target.checked ){
+                	var layer = globals.products.find(function(model) { return model.get('name') == options.name; });
+                    if (layer != -1  && !(typeof layer === 'undefined')) {
+                    	var url = layer.get('view').urls[0]+"?";
 
-                var product = globals.products.find(function(model) { return model.get('name') == options.name; });
+                    	if (url.indexOf('https') > -1){
 
-				if (product){
+                    		var layer = layer.get('view').id;
+							var req = "LAYERS=" + layer + "&TRANSPARENT=true&FORMAT=image%2Fpng&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG%3A4326";
+							req += "&BBOX=33.75,56.25,33.80,56.50&WIDTH=2&HEIGHT=2";
+							req = url + req;
 
-					if (options.visible && product.get("view").protocol=="WMS"){
-						var getmap = "?LAYERS="+product.get("view").id+"&TRANSPARENT=true&FORMAT=image%2Fpng&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetMap&STYLES=&SRS=EPSG%3A4326&BBOX=33.75,56.25,39.375,61.875&WIDTH=256&HEIGHT=256&TIME=2014-02-19T00:00:00Z/2014-02-19T00:00:00Z"
-						$.get(product.get("view").urls[0] + getmap, function (){
-							Communicator.mediator.trigger('map:layer:change', options);
-						}, 'text');
-					} else {
-						Communicator.mediator.trigger('map:layer:change', options);
-					}
-				}else{
-					Communicator.mediator.trigger('map:layer:change', options);
-				}
+	                    	$.ajax({
+							    url: req,
+							    type: "GET",
+							    suppressErrors: true,
+							    xhrFields: {
+							      withCredentials: true
+							   	},
+							    success: function(xml, textStatus, xhr) {
+							        Communicator.mediator.trigger('map:layer:change', options);
+							    },
+							    error: function(jqXHR, textStatus, errorThrown) {
+							    	if (jqXHR.status == 403){
+							    		$("#error-messages").append(
+					                              '<div class="alert alert-warning alert-danger">'+
+					                              '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+
+					                              '<strong>Warning!</strong> You are not authorized to access this product' +
+					                            '</div>'
+					                    );
+							    	}else{
+							    		
+							    		this.authview = new av.AuthView({
+								    		model: new am.AuthModel({url:req}),
+								    		template: iFrameTmpl,
+								    		layerprop: options
+								    	});
+
+								    	Communicator.mediator.trigger("progress:change", false);
+
+								    	App.info.show(this.authview);
+
+							    	}
+							    }
+							});
+	                    }else{
+	                    	Communicator.mediator.trigger('map:layer:change', options);
+	                    }
+                    }else if (typeof layer === 'undefined'){
+ 	                	Communicator.mediator.trigger('map:layer:change', options);
+ 	                }
+                } else if (!evt.target.checked){
+                	Communicator.mediator.trigger('map:layer:change', options);
+        	 	} else if (isBaseLayer && evt.target.checked){
+	             	Communicator.mediator.trigger('map:layer:change', options);
+                }
             },
 
             drop: function(event, index) {

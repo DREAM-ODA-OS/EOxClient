@@ -120,7 +120,7 @@
 
                 var frame = $('#layer-info-frame') ;
 
-                if ( response && response.protocol == 'WMS' &&  response.request.type == 'GET' ) {
+                if (response && response.request.type == 'GET' && (response.protocol == 'WMS' || response.protocol == 'WPS')) {
                     frame.css('display','block');
                     frame.attr('srcdoc',response.data); // HTML5 feature - overides 'src' attribute when supported by the browser
                     frame.attr('src',response.request.url);

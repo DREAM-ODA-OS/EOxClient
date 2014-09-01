@@ -71,16 +71,19 @@
       events: {
         "click #btn-select-all-coverages": "onSelectAllCoveragesClicked",
         "click #btn-invert-coverage-selection": "onInvertCoverageSelectionClicked",
+        "click #btn-refresh-list": "onRefreshClick",
+        "click #btn-modify-selection": "onModifyClick",
         'change input[type="checkbox"]': "onCoverageSelected",
         "click #btn-start-download": "onStartDownloadClicked"
       },
 
       initialize: function(options) {
-
         this.coverages = new Backbone.Collection([]);
-
       },
+
       onShow: function(view){
+
+        this.$('#download-alert').html("Search in progress ...");
 
         this.listenTo(this.coverages, "reset", this.onCoveragesReset);
         this.$('.close').on("click", _.bind(this.onClose, this));
@@ -108,7 +111,7 @@
           } //TODO: Check what to set if timeslider not activated
 
           options.subsetCRS = "http://www.opengis.net/def/crs/EPSG/0/4326";
-          var bbox = this.model.get("AoI").getBounds();
+          var bbox = this.model.get("AoI");
           options.subsetX = [bbox.left, bbox.right];
           options.subsetY = [bbox.bottom, bbox.top];
 
@@ -121,18 +124,25 @@
         var deferreds = _.invoke(coverageSets, "fetch");
 
         $.when.apply($, deferreds).done(_.bind(function() {
-
-
           _.each(coverageSets, function(set) {
             set.each(function(model) {
               model.set("url", set.url)
             });
           });
-
           var coverage = _.flatten(_.pluck(coverageSets, "models"));
           this.coverages.reset(coverage);
         }, this));
       },
+
+			onRefreshClick: function () {
+				Communicator.mediator.trigger("dialog:open:download", false);
+				Communicator.mediator.trigger("dialog:open:download", true);
+			},
+
+			onModifyClick: function () {
+				Communicator.mediator.trigger("dialog:open:download", false);
+				Communicator.mediator.trigger("dialog:open:downloadSelection");
+			},
 
       onSelectAllCoveragesClicked: function() {
         // select all coverages
@@ -148,18 +158,37 @@
 
       onCoveragesReset: function() {
         var $downloadList = this.$("#download-list");
+        var $infoFrame = this.$("#download-info-frame");
+        var layers = globals.products.filter(function(model) { return model.get('visible'); });
+
+        this.$('#download-alert').html(this.coverages.length > 0 ? "" : "No coverage matching the selection found.");
 
         this.coverages.each(function(coverage) {
           var coverageJSON = coverage.toJSON();
 		  //alert(JSON.stringify(coverageJSON, null, 4));
           var $html = $(SelectCoverageListItemTmpl(coverageJSON));
+          var infoURL = coverage.get('url').split('?')[0] +
+              "?SERVICE=WPS&VERSION=1.0.0&REQUEST=Execute&IDENTIFIER=getCoverageInfo" +
+              "&RawDataOutput=info&DATAINPUTS=identifier%3D" + coverage.get("coverageId")
           $downloadList.append($html);
+          if (coverage.get("coverageSubtype") != "RectifiedDataset") {
+            $html.find("#cov-info-flag").html("&nbsp;[RAW]")
+          }
           $html.find("i").popover({
             trigger: "hover",
             html: true,
             content: CoverageInfoTmpl(coverageJSON),
             title: "Coverage Description",
             placement: "bottom"
+          });
+          var $i = $html.find("i")
+          $i.css("font-size","1em")
+          $i.click(function(){
+            $downloadList.find("i").css("color","black")
+            $i.css("color","red")
+            //$infoFrame.attr('srcdoc',response.data); // HTML5 feature - overides 'src' attribute when supported by the browser
+            $infoFrame.attr('src', infoURL);
+            return false;
           });
         }, this);
       },
@@ -179,9 +208,11 @@
         var $downloads = $("#div-downloads"),
             options = {};
 
-        var bbox = this.model.get("AoI").getBounds();
-        options.subsetX = [bbox.left, bbox.right];
-        options.subsetY = [bbox.bottom, bbox.top];
+        var bbox = this.model.get("AoI");
+        if (this.$('#select-output-clipping').is(":checked")) {
+            options.subsetX = [bbox.left, bbox.right];
+            options.subsetY = [bbox.bottom, bbox.top];
+        }
 
         // format + outputcrs
         options.format = this.$("#select-output-format").val();
@@ -189,6 +220,7 @@
 
         // apply mask parameter if polygon is not a square
         // (described by 5 points, first and last the same)
+        /*
         var components = this.model.get("AoI").components[0].components;
         if(components.length>5){
           var coords = [];
@@ -198,17 +230,17 @@
           });
           options.mask = coords.join(" ");
         }
-
+        */
 
         this.$('input[type="checkbox"]').each(_.bind(function(index) {
           if ($('input[type="checkbox"]')[index].checked){
             var model = this.coverages.models[index];
+            options.coverageSubtype = model.get('coverageSubtype');
             var xml = getCoverageXML(model.get('coverageId'), options);
 
-            var owsUrl = model.get('url').split('?')[0] + '?';
+            var owsUrl = model.get('url').split('?')[0];
 
-            var $form = $(CoverageDownloadPostTmpl({
-              url: owsUrl, xml: xml}));
+            var $form = $(CoverageDownloadPostTmpl({url: owsUrl, xml: xml}));
             $downloads.append($form);
             _.delay(function() {
             $form.submit();

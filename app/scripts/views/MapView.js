@@ -355,7 +355,7 @@ define(['backbone',
                     var map_crs_reverse_axes = true;
 
                     // prepare getFeatureInfo request
-                    function getFetureInfoWMS13(info,prm){
+                    function getFeatureInfoWMS13(info,prm){
 
                         var format = "text/html" ;
                         var maxFeatureCount = 1 ;
@@ -368,6 +368,22 @@ define(['backbone',
                             '&HEIGHT=' + prm.size.h + '&WIDTH=' + prm.size.w +
                             '&X=' + prm.xy.x + '&Y=' + prm.xy.y +
                             '&INFO_FORMAT=' + format + '&FEATURE_COUNT=' + maxFeatureCount ;
+
+                        return {
+                            type: 'GET',
+                            url: request
+                        }
+                    }
+
+                    // prepare getFeatureInfo request
+                    function getCoverageInfoWPS10(info, prm){
+
+                        var request = info.url +
+                            "?SERVICE=WPS&VERSION=1.0.0&REQUEST=Execute&IDENTIFIER=getCoverageInfo" +
+                            "&RawDataOutput=info&DATAINPUTS=identifier%3D" + info.id +
+                            "%3Bbegin_time%3D" + getISODateTimeString(prm.time.start) +
+                            "%3Bend_time%3D" + getISODateTimeString(prm.time.end) +
+                            "%3Blongitude%3D" + prm.lonlat.lon + "%3Blatitude%3D" + prm.lonlat.lat
 
                         return {
                             type: 'GET',
@@ -413,22 +429,20 @@ define(['backbone',
 
                         var layer = layers[i]
                         var info = layers[i].get('info') ;
+                        var request = null;
 
                         switch ( info.protocol ) {
-
                             case 'WMS': // WMS protocol - getFeatureInfo
-                                var request = getFetureInfoWMS13(info,prm) ;
-                                break ;
+                                request = getFeatureInfoWMS13(info,prm);
+                                break;
 
-                            /* TODO WPS
                             case 'WPS': // WPS protocol - EOxServer specific
-                                request = getWPS(info,prm) ;
-                                break ;
-                            */
+                                request = getCoverageInfoWPS10(info, prm);
+                                break;
 
                             default:
                                 console.error('Unsupported info protocol "'+info.protocol+'" ! LAYER="'+layer.get('view').id+'"');
-                                continue ;
+                                continue;
                         }
 
                         // get the response

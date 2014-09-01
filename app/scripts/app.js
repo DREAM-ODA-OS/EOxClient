@@ -46,8 +46,8 @@
         'controller/IngestionAdminT6Controller',
         'controller/OrthoQualityController',
 		'controller/IceChartingController',
-		'router',
-		'd3'
+        'vendor/mwps',
+		'router'
 	],
 
 	function( Backbone, Communicator, globals, DialogRegion, 
@@ -67,9 +67,6 @@
                 	hide: { effect: false, duration: 0 },
                 	show:{ effect: false, delay: 700}
                 });
-
-				var colors = d3.scale.category10();
-				var color_index = 0;
 
                 // Ingestion Engine options
 				globals.objects.add('ingestionEngineT5', config.ingestionEngineT5);
@@ -125,10 +122,10 @@
 				// by the marionette collection view
 				if (config.navBarConfig) {
 
-					var navBarItemCollection = new models.NavBarCollection();
+					globals.navBarItems = new models.NavBarCollection();
 
 					_.each(config.navBarConfig.items, function(item){
-						navBarItemCollection.add(models.parseNavBarItemConfig(item));
+						globals.navBarItems.add(models.parseNavBarItemConfig(item));
 					}, this);
 
 					this.topBar.show(new views.NavBarCollectionView(
@@ -137,7 +134,7 @@
 							url: config.navBarConfig.url}),
 						className:"navbar navbar-inverse navbar-opaque navbar-fixed-top not-selectable",
 						itemView: views.NavBarItemView, tag: "div",
-						collection: navBarItemCollection}));
+						collection: globals.navBarItems}));
 
 				};
 
@@ -251,6 +248,10 @@
 				});
 
 				$(document).ajaxError(function( event, request, settings ) {
+					if(settings.suppressErrors) {
+				        return;
+				    }
+				    
 					var statuscode = "";
 					if (request.status != 0)
 						statuscode =  '<br>Status Code: '+ request.status;
