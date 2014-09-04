@@ -51,13 +51,12 @@
             initialize: function(options) {
 
                 // model initialization:
-
                 this.model.fetch({
                     error:function(m,r,o){
-                        console.log("fetch error:\n"+r);
-                        for (var i in r) {
-                            console.log(i+" : "+r[i]);
-                        }
+                        console.error("Failed to fetch the ingestion scenarios!");
+                        console.error(m);
+                        console.error(r);
+                        console.error(o);
                     }
                 });
 

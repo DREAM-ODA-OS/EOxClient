@@ -77,92 +77,103 @@
                     if (! that.is_showing ) { return; }
                     var scenarios = that.model.get('scenarios'); 
                     var scenarioHTML = '';
-                    for (var i=0; i<scenarios.length; i++)
-                    {
-                        var ncn_id = scenarios[i].ncn_id;
-                        scenarioHTML +=
-                            '<table width="100%" frame="void">' +
-                            '<tr>' +
+                    var alertMessage = '';
 
-                            // buttons
-                            '<td width=19%>' +
-                            // ingest
-                            '<button type="button" class="btn btn-default" ' +
-                                'id="btn-ingest-scenario-' + ncn_id + '" title="Ingest scenario '+ ncn_id +'" >' +
-                                '<i class="fa fa-sign-in fa-rotate-90"></i></button>' +
+                    if (scenarios) {
+                        for (var i=0; i<scenarios.length; i++)
+                        {
+                            var ncn_id = scenarios[i].ncn_id;
+                            scenarioHTML +=
+                                '<table width="100%" frame="void">' +
+                                '<tr>' +
 
-                            // Add local product from file
-                            '<button type="button" class="btn btn-default" ' +
-                                'id="btn-add-product-' + ncn_id + '" title="Add local product to '+ ncn_id+'" >' +
-                                '<i class="fa fa-file-o"></i></button>' +
+                                // buttons
+                                '<td width=19%>' +
+                                // ingest
+                                '<button type="button" class="btn btn-default" ' +
+                                    'id="btn-ingest-scenario-' + ncn_id + '" title="Ingest scenario '+ ncn_id +'" >' +
+                                    '<i class="fa fa-sign-in fa-rotate-90"></i></button>' +
 
-                            // edit
-                            '<button type="button" class="btn btn-default" ' +
-                                'id="btn-edit-scenario-' + ncn_id + '" title="Edit scenario '+ ncn_id + '" >' +
-                                '<i class="fa fa-edit"></i></button>' +
+                                // Add local product from file
+                                '<button type="button" class="btn btn-default" ' +
+                                    'id="btn-add-product-' + ncn_id + '" title="Add local product to '+ ncn_id+'" >' +
+                                    '<i class="fa fa-file-o"></i></button>' +
 
-                            // delete
-                            '<button type="button" class="btn btn-default" ' +
-                                'id="btn-delete-scenario-' + ncn_id + '" title="Delete scenario '+ ncn_id+'" >' +
-                                '<i class="fa fa-trash-o"></i></button>' +
-                            '</td>' +
+                                // edit
+                                '<button type="button" class="btn btn-default" ' +
+                                    'id="btn-edit-scenario-' + ncn_id + '" title="Edit scenario '+ ncn_id + '" >' +
+                                    '<i class="fa fa-edit"></i></button>' +
 
-                            // id and name
-                            '<td width=10% title="Scenario Id">' + ncn_id + '</td>' +
-                            '<td colspan=2 title="Scenario Name">' + scenarios[i].scenario_name + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            //                            '<td></td>' +
+                                // delete
+                                '<button type="button" class="btn btn-default" ' +
+                                    'id="btn-delete-scenario-' + ncn_id + '" title="Delete scenario '+ ncn_id+'" >' +
+                                    '<i class="fa fa-trash-o"></i></button>' +
+                                '</td>' +
 
-                            // description text accross all columns
-                            '<td colspan=3 title="Description">' + scenarios[i].scenario_description + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            // '<td></td>' +
+                                // id and name
+                                '<td width=10% class="scenario-id" title="Scenario Id">' + ncn_id + '</td>' +
+                                '<td colspan=2 class="scenario-title"  title="Scenario Name">' + scenarios[i].scenario_name + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                //                            '<td></td>' +
 
-                            // status
-                            '<td><div id="div_status_' + ncn_id + '"/>' + scenarios[i].st_st + '</td>' +
-                            
-                            // stop button
-                            '<td><button type="button" class="btn btn-default" ' +
-                                'id="btn-stop-scenario-' + ncn_id + '" title="Stop scenario'+ ncn_id+'" >' +
-                                 '<i class="fa fa-stop"></i></button>' +
-                            '</td>' +
-                            '<td>' +
+                                // description text accross all columns
+                                '<td colspan=3  class="scenario-info" title="Description">' + scenarios[i].scenario_description + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                // '<td></td>' +
 
-                            // progress bar
-                            '<div id="pro_container_' + ncn_id + '" ' +
-                                'style="width:100%; height:10px; border:1px solid black; ' +
-                                'vertical-align:middle; padding:0">' +
-                            '<div id="progress_bar_' + ncn_id + '" ' +
-                                'style="width:' + scenarios[i].st_done +'%; height:8px; border:none; background-color:#6666dd; ' +
-                                'padding:0; vertical-align:sub"/>' +
-                            '</div>' +
+                                // status
+                                '<td><div id="div_status_' + ncn_id + '"/>' + scenarios[i].st_st + '</td>' +
 
-                            '</td>' +
-                            '</tr>' +
-                            '</table>' +
-                            '<hr>';
+                                // stop button
+                                '<td><button type="button" class="btn btn-default" ' +
+                                    'id="btn-stop-scenario-' + ncn_id + '" title="Stop scenario'+ ncn_id+'" >' +
+                                     '<i class="fa fa-stop"></i></button>' +
+                                '</td>' +
+                                '<td>' +
+
+                                // progress bar
+                                '<div id="pro_container_' + ncn_id + '" ' +
+                                    'style="width:100%; height:10px; border:1px solid black; ' +
+                                    'vertical-align:middle; padding:0">' +
+                                '<div id="progress_bar_' + ncn_id + '" ' +
+                                    'style="width:' + scenarios[i].st_done +'%; height:8px; border:none; background-color:#6666dd; ' +
+                                    'padding:0; vertical-align:sub"/>' +
+                                '</div>' +
+
+                                '</td>' +
+                                '</tr>' +
+                                '</table>' +
+                                '<hr>';
+                        }
+                        if (scenarios.length == 0) {
+                            alertMessage = "No ingestion scenario defined. Create a new one by clicking on the Create Scenario button below.";
+                        }
+                    } else {
+                        alertMessage = "Failed to fetch scenarios from the Ingestion Engine!";
                     }
 
+                    that.$('#ingestion-alert').html(alertMessage);
                     that.$('#scenario-list').html(scenarioHTML);
 
-                    for (var i=0; i<scenarios.length; i++)
-                    {
-                        var ncn_id = scenarios[i].ncn_id;
-                        var sc_id  = scenarios[i].id;
+                    if (scenarios) {
+                        for (var i=0; i<scenarios.length; i++)
+                        {
+                            var ncn_id = scenarios[i].ncn_id;
+                            var sc_id  = scenarios[i].id;
 
-                        that.$('#btn-ingest-scenario-' + ncn_id).on
-                            ("click", _.bind(that.run_iet5_ajax, that, "ingestScenario", "Ingest", sc_id, ncn_id));
-                        that.$('#btn-delete-scenario-' + ncn_id).on
-                            ("click", _.bind(that.run_iet5_ajax, that, "deleteScenario", "Delete", sc_id, ncn_id));
-                        that.$('#btn-stop-scenario-'   + ncn_id).on
-                            ("click", _.bind(that.run_iet5_ajax, that, "stopScenario",    "Stop",  sc_id, ncn_id));
-                        that.$('#btn-add-product-'     + ncn_id).on("click",  _.bind(that.onAddLocalProduct, that, sc_id, ncn_id));
-                        that.$('#btn-edit-scenario-'   + ncn_id).on("click",  _.bind(that.onEditScenario,    that, ncn_id));
+                            that.$('#btn-ingest-scenario-' + ncn_id).on
+                                ("click", _.bind(that.run_iet5_ajax, that, "ingestScenario", "Ingest", sc_id, ncn_id));
+                            that.$('#btn-delete-scenario-' + ncn_id).on
+                                ("click", _.bind(that.run_iet5_ajax, that, "deleteScenario", "Delete", sc_id, ncn_id));
+                            that.$('#btn-stop-scenario-'   + ncn_id).on
+                                ("click", _.bind(that.run_iet5_ajax, that, "stopScenario",    "Stop",  sc_id, ncn_id));
+                            that.$('#btn-add-product-'     + ncn_id).on("click",  _.bind(that.onAddLocalProduct, that, sc_id, ncn_id));
+                            that.$('#btn-edit-scenario-'   + ncn_id).on("click",  _.bind(that.onEditScenario,    that, ncn_id));
 
+                        }
                     }
-
                 },
 
                 run_iet5_ajax : function (url_key, op, sc_id, ncn_id)
@@ -236,11 +247,9 @@
                     this.$('#btn-iet5-addscenario').on("click", _.bind(this.onAddScenario, this));
                     this.$('#btn-iet5-showlog').on("click",     _.bind(this.onShowLog,     this));
 
-                    this.updater.i = setInterval(_.bind(function() {
-                                this.model.fetch();
-                            },
-                            this ),
-                       2250);
+                    this.$('#ingestion-alert').html("Loading scenarios from the Ingestion Engine ...");
+
+                    this.updater.i = setInterval(_.bind(function() { this.model.fetch(); }, this ), 2250);
 
                     this.$el.draggable(
                     { 
