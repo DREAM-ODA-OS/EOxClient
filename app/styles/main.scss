@@ -226,6 +226,23 @@ button[active=active] {
 .fa-sort {
     cursor: ns-resize;
 }
+#layer-control-products-alert {
+    color:red;
+}
+#layer-control-overlays {
+  padding-bottom: 0px;
+}
+#layer-control-products {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  max-height: 30em;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#layer-control-base {
+  padding-top: 0px;
+}
+
 
 /*
  * Tool control
@@ -489,8 +506,27 @@ button[active=active] {
   margin: 0 0 0 0;
   font-size: 1em;
   position: absolute;
-  overflow-y: scroll;
 }
+
+.ingestion-overview .panel-body {
+  max-height: 30em;
+  overflow-y: auto;
+}
+
+#ingestion-alert {
+    color:red;
+}
+
+.scenario-id {
+    color: darkblue;
+    font-weight: bold;
+}
+
+.scenario-title {
+    font-weight: bold;
+}
+
+.scenario-info {}
 
 /*
  * Add Local Product
