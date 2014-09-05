@@ -237,7 +237,7 @@ button[active=active] {
   padding-bottom: 0px;
   max-height: 30em;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 #layer-control-base {
   padding-top: 0px;
@@ -501,7 +501,7 @@ button[active=active] {
  */
 .ingestion-overview {
   top: 10em;
-  left: 5em;
+  right: 5em;
   width: 66em;
   margin: 0 0 0 0;
   font-size: 1em;
@@ -510,6 +510,7 @@ button[active=active] {
 
 .ingestion-overview .panel-body {
   max-height: 30em;
+  overflow-x: visible;
   overflow-y: auto;
 }
 

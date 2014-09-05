@@ -63,7 +63,7 @@
 				$( ".sortable" ).sortable({
 					revert: true,
 					delay: 90,
-					containment: ".layercontrol .panel-body",
+					containment: ".layercontrol #layer-control-products",
 					axis: "y",
 					forceHelperSize: true,
 					forcePlaceHolderSize: true,
