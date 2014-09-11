@@ -46,9 +46,7 @@
     	
     }
 
-    // assure all required JS modules + the configuration are available
-    // ... and trigger the main app's setup
-    root.require([
+    var deps = [
 		'backbone',
         'app',                  // the main app
         'backbone.marionette',
@@ -56,27 +54,31 @@
         'jquery',
         'jqueryui',
         "util",                 // variaous utilities
-        "libcoverage",          // WCS handling code
-        "text!../config.json"   // static configuration file
-	],
-	function ( Backbone, App ) {
+        "libcoverage"          // WCS handling code
+	] ;
+
+	var callback = function(Backbone, App) {
 
         function error_handler( message, url, xhr)
         {
-                window.alert( message+"\nURL: "+url
-                    +"\nERROR: "+xhr.status+" "+xhr.statusText )
+            window.alert( message+"\nURL: "+url
+                +"\nERROR: "+xhr.status+" "+xhr.statusText )
         }
 
         var config_url = "config.json";
 
+        console.log("Loading config.json ...")
         $.ajax({
             url: config_url,
             async: false,
             cache: false,
             error: function( xhr, status_, error )
             {
-                error_handler("Failed to load the client's configuration!\n"+
-                    "The client cannot be started!", config_url, xhr)
+                error_handler("The browser failed to load the client's configuration!\n"+
+                    "The client cannot be started!\n\n"+
+                    "This may be a temporary problem.\n"+
+                    "Please, click OK to reload the client.\n", config_url, xhr)
+                location.reload(true)
             },
             success: function(config_src)
             {
@@ -89,9 +91,10 @@
                     cache: false,
                     error: function( xhr, status_, error )
                     {
-                        error_handler( "Failed to load the data layers' "
-                            +"definitions!\nNo data layers will be displayed!",
+                        error_handler( "Failed to load the data layers' definitions!\n\n"
+                            +"This may be a temporary problem.\nPlease, try to reload the client.\n",
                             config_src.mapConfig.dataconfigurl, xhr)
+                        location.reload(true)
                     },
                     success: function(data_cfg)
                     {
@@ -138,6 +141,19 @@
 
             }
         });
+    }
 
-    });
+	var err_callback = function(err) {
+        console.log("uire failed!")
+        console.log(err)
+        window.alert( "Failed to load some of the dependencies.\n"+
+                "This may be a temporary problem.\n"+
+                "Click OK to reaload the client.\n\n"+
+                "Reason: " + err.requireType + "\nModule(s): " + err.requireModules)
+        location.reload(true)
+    }
+
+    // assure all required JS modules + the configuration are available
+    // ... and trigger the main app's setup
+    root.require(deps ,callback, err_callback);
 }).call( this );
