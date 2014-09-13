@@ -54,8 +54,6 @@ define(['backbone',
 					//listen to moeveend event in order to keep router uptodate
 					this.map.events.register("moveend", this.map, function(data) {
 
-                        console.log("moveend");
-
                         Communicator.mediator.trigger("router:setUrl", {
                             time: mapView.timeinterval,
                             center: data.object.center,
@@ -64,6 +62,11 @@ define(['backbone',
 
 			            Communicator.mediator.trigger("map:position:change", data.object.getExtent());
 			        });
+
+                    this.map.events.register("updatesize", this.map, function(data) {
+                        Communicator.mediator.trigger("map:size:change", data.object.getSize());
+                    });
+
 
 					this.listenTo(Communicator.mediator, "map:center", this.centerMap);
 					this.listenTo(Communicator.mediator, "map:layer:change", this.changeLayer);
@@ -78,6 +81,7 @@ define(['backbone',
 					this.listenTo(Communicator.mediator, 'selection:bbox:changed', this.onSelectionBBoxChanged);
 					this.listenTo(Communicator.mediator, 'map:marker:set', this.setMarker);
 					this.listenTo(Communicator.mediator, 'map:marker:clearAll', this.clearMarkers);
+					this.listenTo(Communicator.mediator, 'map:layer:save', this.getLayerURL);
 
 					Communicator.reqres.setHandler('map:get:extent', _.bind(this.onGetMapExtent, this));
 					Communicator.reqres.setHandler('get:selection:json', _.bind(this.onGetGeoJSON, this));
@@ -176,6 +180,10 @@ define(['backbone',
 					//Set attributes of map based on mapmodel attributes
 				    var mapmodel = globals.objects.get('mapmodel');
 				    this.map.setCenter(new OpenLayers.LonLat(mapmodel.get("center")), mapmodel.get("zoom") );
+
+                    // signal the initial map size
+                    Communicator.mediator.trigger("map:size:change", this.map.getSize());
+
 				    return this;
 				},
 				//method to create layer depending on protocol
@@ -347,6 +355,58 @@ define(['backbone',
 
                 clearMarkers: function() {
                     this.markerLayer.clearMarkers();
+                },
+
+                getLayerURL: function(obj) {
+                    //TODO: move to global map configuration
+                    var map_crs_reverse_axes = true;
+
+                    function getMapWMS13(view, prm)
+                    {
+                        return {
+                            view: view,
+                            prm: prm,
+                            url: view.urls[0] +
+                                '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap' +
+                                '&LAYERS=' + view.id +
+                                '&BBOX=' + prm.bbox.toBBOX(10,map_crs_reverse_axes) + '&CRS=' + prm.crs +
+                                '&TIME=' + getISODateTimeString(prm.time.start) + '/' + getISODateTimeString(prm.time.end) +
+                                '&HEIGHT=' + prm.size.h + '&WIDTH=' + prm.size.w + "&TRANSPARENT=true" + "&STYLES=" +
+                                '&FORMAT=' + prm.format
+                            /*
+                            url: view.urls[0],
+                            query: {
+                                SERVICE: 'WMS',
+                                VERSION: '1.3.0',
+                                REQUEST: 'GetMap',
+                                LAYERS: view.id,
+                                BBOX: prm.bbox.toBBOX(10,map_crs_reverse_axes),
+                                CRS: prm.crs,
+                                TIME: getISODateTimeString(prm.time.start)+'/'+ getISODateTimeString(prm.time.end),
+                                HEIGHT: String(prm.size.h),
+                                WIDTH: String(prm.size.w),
+                                TRANSPARENT: 'true',
+                                STYLES: '',
+                                FORMAT: prm.format
+                            }
+                            */
+                        }
+                    }
+
+                    // request Parameters
+                    var prm = {
+                        time: {
+                            start: this.timeinterval.start,
+                            end: this.timeinterval.end
+                        },
+                        bbox: this.map.getExtent(),
+                        crs: this.map.projection,
+                        size: this.map.getSize(),
+                        format: obj.format
+                    };
+
+                    // run the passed callback
+                    obj.action(getMapWMS13(obj.layer.get('view'), prm))
                 },
 
                 onMapClick: function(clickEvent){

@@ -1,11 +1,11 @@
 <div class="input-group">
     <span class="input-group-addon">
-        <input type="checkbox" {{#if visible}}checked="checked"{{/if}}/>
+        <input type="checkbox" {{#if visible}}checked="checked"{{/if}} title="Toggle the layer's visibility."/>
     </span>
-    <span class="form-control">{{name}}</span>
+    <span class="form-control" title="When the layer is visible click here to open the layer's options dialog.">{{name}}</span>
     <span class="input-group-addon">
-        <i class="fa fa-sort"></i>
-        <i class="fa fa-square" style="color: {{color}}"></i>
-        <i class="fa fa-adjust" data-toggle="popover" data-content="n"></i>
+        <i class="fa fa-sort" title="Drag to change the layer's order."></i>
+        <i class="fa fa-square" style="color: {{color}}" title="This is the layer's colour used by the time-slider's ticks."></i>
+        <!-- i class="fa fa-adjust" data-toggle="popover" data-content="n"></i -->
     </span>
 </div>
