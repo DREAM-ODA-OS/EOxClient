@@ -15,14 +15,14 @@
 <div class="panel-footer">
   <p>
     format:
-    <select class="input-small" id="select-output-format">
+    <select class="input-small" id="select-output-format" title="Select the output format of the downloaded dataset(s).">
       <option value="" selected>&lt;native format&gt;</option>
       <option value="image/tiff">GeoTIFF</option>
       <option value="image/jp2">JPEG 2000</option>
       <option value="application/x-netcdf">NetCDF</option>
     </select>
     &nbsp;&nbsp;projection:
-    <select class="input-medium" id="select-output-crs">
+    <select class="input-medium" id="select-output-crs" title="Select the output CRS of the dowloaded dataset(s). The output-CRS has no effect on the referenceable (RAW) datasets.">
       <option value="" selected>&lt;native projection&gt;</option>
       <option value="epsg:4326">Geog. Lat/Lon / WGS84 (EPSG:4326)</option>
       <option value="epsg:3857">Spherical Mercator (e.g. Google Maps) (EPSG:3857)</option>
@@ -158,13 +158,13 @@
       <option value="epsg:32760">UTM 60S / WGS84 (EPSG:32760)</option>
     </select>
     &nbsp;&nbsp;
-    <input type="checkbox" id="select-output-clipping" checked="yes">selection clips data</input>
+    <input type="checkbox" id="select-output-clipping" checked="yes" title="When enabled, the downloaded dataset will be trimmed to match the displayed selection bounding box. The whole dataset will be donwloaded otherwise.">selection clips data</input>
   </p>
   <p>
-    <button type="button" class="btn btn-primary" id="btn-start-download" disabled="disabled"><i class="fa fa-fw fa-download"></i> Start Download</button>
-    <button type="button" class="btn btn-default" id="btn-select-all-coverages"><i class="fa fa-fw fa-check-square"></i> Select All</button>
-    <button type="button" class="btn btn-default" id="btn-invert-coverage-selection"><i class="fa fa-fw fa-check-square-o"></i> Invert Selection</button>
-    <button type="button" class="btn btn-default" id="btn-refresh-list"><i class="fa fa-fw fa-refresh"></i> Refresh</button>
-    <button type="button" class="btn btn-default" id="btn-modify-selection"><i class="fa fa-fw fa-edit"></i> Modify</button>
+    <button type="button" class="btn btn-primary" id="btn-start-download" disabled="disabled" title="Click to proceed with the actual donwload."><i class="fa fa-fw fa-download"></i> Start Download</button>
+    <button type="button" class="btn btn-default" id="btn-select-all-coverages" title="Select all listed datasets."><i class="fa fa-fw fa-check-square"></i> Select All</button>
+    <button type="button" class="btn btn-default" id="btn-invert-coverage-selection" title="Invert the selection of the donwloaded dataset."><i class="fa fa-fw fa-check-square-o"></i> Invert Selection</button>
+    <button type="button" class="btn btn-default" id="btn-refresh-list" title="Refresh the list of the matching datasets (e.g., after modified layer selection)."><i class="fa fa-fw fa-refresh"></i> Refresh</button>
+    <button type="button" class="btn btn-default" id="btn-modify-selection" title="Return to the time and area specification."><i class="fa fa-fw fa-edit"></i> Modify</button>
   </p>
 </div>
