@@ -47,16 +47,9 @@
             template: {type: 'handlebars', template: LayerOptionsTmpl},
 
 			events: {
-                //'click #btn-get-mosaic': 'onMosaicRequest'
-				//'drop' : 'drop',
-				//'change': 'onChange',
-				//'click .fa-adjust': 'onOpenSlider',
-                //'click .form-control': 'onClick'
-				//'slide .ui-slider': 'onOpacityAdjust'
-			},
+            },
 
             initialize: function() {
-
                 var that = this
 
 				this.$slider = $('<div>').slider({
@@ -79,16 +72,20 @@
             },
 
             onShow: function (view) {
-                this.$('.close').on("click", _.bind(this.close, this));
+                this.$('.close').on('click', _.bind(this.close, this));
 
                 this.$el.draggable({
-                    containment: "#content" ,
+                    containment: '#content',
                     scroll: false,
                     handle: '.panel-heading'
                 });
 
                 this.$('#layer-options-opacity').append(this.$slider);
                 this.update();
+
+                // The backbone events table is not relieable as it tends to loose
+                // the event/handler binding! The event needs to be set 'manually'.
+                this.$('.cbx-layers').on('change', _.bind(this.changeLayers, this));
             },
 
             onClose: function() {
@@ -106,20 +103,18 @@
                 }
 
                 this.$('#layer-options-label').html('<i class="fa fa-square" style="color:'+layer.get('color')+'"></i>&nbsp;'+layer.get('name'));
-                this.$('#layer-options-opacity-value').html((layer.get('opacity')*100)+'%')
-                this.$('#layer-options-opacity > .ui-slider').slider('option', 'value', layer.get('opacity')*100)
+                this.$('#layer-options-opacity-value').html((layer.get('opacity')*100)+'%');
+                this.$('#layer-options-opacity > .ui-slider').slider('option', 'value', layer.get('opacity')*100);
+                this.$('#cbx-layer-outlines').prop('checked', layer.get('show_outlines'));
 
-                this.updateDownloadLink()
+                this.updateDownloadLink();
             },
 
-            updateDownloadLink: function()
-            {
+            updateDownloadLink: function() {
                 var layer = this.model.get('layer');
-			    console.log("updateDownloadLink()");
 
                 if (!layer) return ;
 
-			    console.log("updateDownloadLink() OK");
                 var $a = this.$('#btn-get-mosaic')
                 var fname = 'mosaic_'+getPackedDateTimeString(new Date())+'.tif';
 
@@ -131,8 +126,38 @@
                         $a.attr('href', request.url)
                     }
                 })
-            }
+            },
 
+            changeLayers: function() {
+                var layer = this.model.get('layer');
+                var view = layer.get('view');
+                var cbx_outlines = this.$('#cbx-layer-outlines').is(":checked");
+                var cbx_cloudless = this.$('#cbx-layer-cloudless').is(":checked");
+                var cbx_cloudmask = this.$('#cbx-layer-cloudmask').is(":checked");
+
+                layer.set('show_outlines', cbx_outlines);
+                layer.set('strip_clouds', cbx_cloudless);
+                layer.set('show_cloud_mask', cbx_cloudmask);
+
+                // TODO: read layer-names from the configurations
+                var layer_data = cbx_cloudless ? view.id+'_masked' : view.id ;
+                var layers = layer_data
+
+                if (cbx_outlines) {
+                    layers += ',' + layer_data + '_outlines' ;
+                }
+
+                if (cbx_cloudmask) {
+                    layers += ',' + view.id + '_cloud' ;
+                }
+
+                if (layer.get('layers') != layer)
+                {
+                    layer.set('layers', layers);
+                    Communicator.mediator.trigger('map:layer:changeAttr', {name: layer.get('name')});
+                    this.updateDownloadLink();
+                }
+            }
         });
 
         return {LayerOptionsView: LayerOptionsView};

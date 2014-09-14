@@ -67,9 +67,9 @@ define(['backbone',
                         Communicator.mediator.trigger("map:size:change", data.object.getSize());
                     });
 
-
 					this.listenTo(Communicator.mediator, "map:center", this.centerMap);
 					this.listenTo(Communicator.mediator, "map:layer:change", this.changeLayer);
+					this.listenTo(Communicator.mediator, "map:layer:changeAttr", this.changeLayerAttributes);
 					this.listenTo(Communicator.mediator, 'map:set:extent', this.onSetExtent);
 					this.listenTo(Communicator.mediator, "productCollection:sortUpdated", this.onSortProducts);
 					this.listenTo(Communicator.mediator, "productCollection:updateOpacity", this.onUpdateOpacity);
@@ -224,7 +224,7 @@ define(['backbone',
 								layerdesc.get("name"),
 						        layer.urls[0],
 						        {
-						        	layers: layer.id,
+						        	layers: layerdesc.get('layers'), // NOTE: the WMS layers can be changed by the client.
 						        	transparent: "true",
         							format: "image/png",
         							time: layer.time
@@ -284,6 +284,15 @@ define(['backbone',
 					}
 				},
 
+                changeLayerAttributes: function(options) {
+                    var product = globals.products.find(function(model){return model.get('name') == options.name;});
+                    if (!product) return ;
+                    var view = product.get('view');
+                    if (view && (view.protocol="WMS")) {
+                        this.map.getLayersByName(options.name)[0].mergeNewParams({layers: product.get('layers')});
+                    }
+                },
+
 				onSortProducts: function(productLayers) {
 				    globals.products.each(function(product) {
 				      var productLayer = this.map.getLayersByName(product.get("name"))[0];
@@ -298,8 +307,6 @@ define(['backbone',
 					if (layer){
 						layer.setOpacity(options.value);
 					}
-					
-
 				},
 
 				onSelectionActivated: function(arg){
@@ -361,25 +368,24 @@ define(['backbone',
                     //TODO: move to global map configuration
                     var map_crs_reverse_axes = true;
 
-                    function getMapWMS13(view, prm)
+                    function getMapWMS13(layer, prm)
                     {
                         return {
-                            view: view,
                             prm: prm,
-                            url: view.urls[0] +
+                            url: layer.get('view').urls[0] +
                                 '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap' +
-                                '&LAYERS=' + view.id +
+                                '&LAYERS=' + layer.get('layers') +
                                 '&BBOX=' + prm.bbox.toBBOX(10,map_crs_reverse_axes) + '&CRS=' + prm.crs +
                                 '&TIME=' + getISODateTimeString(prm.time.start) + '/' + getISODateTimeString(prm.time.end) +
                                 '&HEIGHT=' + prm.size.h + '&WIDTH=' + prm.size.w + "&TRANSPARENT=true" + "&STYLES=" +
                                 '&FORMAT=' + prm.format
                             /*
-                            url: view.urls[0],
+                            url: layer.get('view').urls[0],
                             query: {
                                 SERVICE: 'WMS',
                                 VERSION: '1.3.0',
                                 REQUEST: 'GetMap',
-                                LAYERS: view.id,
+                                LAYERS: layer.get('layers'),
                                 BBOX: prm.bbox.toBBOX(10,map_crs_reverse_axes),
                                 CRS: prm.crs,
                                 TIME: getISODateTimeString(prm.time.start)+'/'+ getISODateTimeString(prm.time.end),
@@ -406,7 +412,7 @@ define(['backbone',
                     };
 
                     // run the passed callback
-                    obj.action(getMapWMS13(obj.layer.get('view'), prm))
+                    obj.action(getMapWMS13(obj.layer, prm))
                 },
 
                 onMapClick: function(clickEvent){
