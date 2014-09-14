@@ -204,8 +204,8 @@
 
       onStartDownloadClicked: function() {
         // for each selected coverage start a download
-        var $downloads = $("#div-downloads"),
-            options = {};
+        var $downloads = $("#div-downloads");
+        var options = {};
 
         var bbox = this.model.get("AoI");
         if (this.$('#select-output-clipping').is(":checked")) {
@@ -231,14 +231,31 @@
         }
         */
 
-        this.$('input[type="checkbox"]').each(_.bind(function(index) {
-          if ($('input[type="checkbox"]')[index].checked){
+        // Raise an alert in case of non-native output-CRS applied for referenceable data-sets.
+
+        var cbx_list = this.$("#download-list").find('input[type="checkbox"]') ;
+
+        if (options.outputCRS) {
+          var refds_count = 0;
+          cbx_list.each(_.bind(function(index) {
+            if (cbx_list[index].checked){
+              if( this.coverages.models[index].get('coverageSubtype') != "RectifiedDataset"){
+                  refds_count += 1;
+              }
+            }
+          }, this));
+          if (refds_count) {
+            window.alert("The download selection contais referenceable datasets (i.e., non-orthorectified RAW products). "+
+                " The selected CRS cannot be applied to these products and they will be delivered in their native RAW geometry.");
+          }
+        }
+
+        cbx_list.each(_.bind(function(index) {
+          if (cbx_list[index].checked){
             var model = this.coverages.models[index];
             options.coverageSubtype = model.get('coverageSubtype');
             var xml = getCoverageXML(model.get('coverageId'), options);
-
             var owsUrl = model.get('url').split('?')[0];
-
             var $form = $(CoverageDownloadPostTmpl({url: owsUrl, xml: xml}));
             $downloads.append($form);
             _.delay(function() {
