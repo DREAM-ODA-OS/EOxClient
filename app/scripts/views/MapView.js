@@ -288,9 +288,15 @@ define(['backbone',
                     var product = globals.products.find(function(model){return model.get('name') == options.name;});
                     if (!product) return ;
                     var view = product.get('view');
+
+                    var new_params = {};
+
                     if (view && (view.protocol="WMS")) {
-                        this.map.getLayersByName(options.name)[0].mergeNewParams({layers: product.get('layers')});
+                        new_params['layers'] = product.get('layers');
+                        new_params['dim_bands'] = product.get('bands') ? product.get('bands') : null;
                     }
+
+                    this.map.getLayersByName(options.name)[0].mergeNewParams(new_params);
                 },
 
 				onSortProducts: function(productLayers) {
@@ -378,7 +384,7 @@ define(['backbone',
                                 '&BBOX=' + prm.bbox.toBBOX(10,map_crs_reverse_axes) + '&CRS=' + prm.crs +
                                 '&TIME=' + getISODateTimeString(prm.time.start) + '/' + getISODateTimeString(prm.time.end) +
                                 '&HEIGHT=' + prm.size.h + '&WIDTH=' + prm.size.w + "&TRANSPARENT=true" + "&STYLES=" +
-                                '&FORMAT=' + prm.format
+                                '&FORMAT=' + prm.format + (layer.get('bands') ? '&DIM_BANDS='+layer.get('bands') : "")
                             /*
                             url: layer.get('view').urls[0],
                             query: {
@@ -393,7 +399,8 @@ define(['backbone',
                                 WIDTH: String(prm.size.w),
                                 TRANSPARENT: 'true',
                                 STYLES: '',
-                                FORMAT: prm.format
+                                FORMAT: prm.format,
+                                DIM_BANDS: layer.get('bands') ? layer.get('bands') : null,
                             }
                             */
                         }

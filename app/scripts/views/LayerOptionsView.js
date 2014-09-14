@@ -86,6 +86,7 @@
                 // The backbone events table is not relieable as it tends to loose
                 // the event/handler binding! The event needs to be set 'manually'.
                 this.$('.cbx-layers').on('change', _.bind(this.changeLayers, this));
+                this.$('#txt-bands').on('change', _.bind(this.changeBands, this));
             },
 
             onClose: function() {
@@ -106,6 +107,9 @@
                 this.$('#layer-options-opacity-value').html((layer.get('opacity')*100)+'%');
                 this.$('#layer-options-opacity > .ui-slider').slider('option', 'value', layer.get('opacity')*100);
                 this.$('#cbx-layer-outlines').prop('checked', layer.get('show_outlines'));
+                this.$('#cbx-layer-cloudless').prop('checked', layer.get('strip_clouds'));
+                this.$('#cbx-layer-cloudmask').prop('checked', layer.get('show_cloud_mask'));
+                this.$('#txt-bands').val(layer.get('bands'));
 
                 this.updateDownloadLink();
             },
@@ -126,6 +130,19 @@
                         $a.attr('href', request.url)
                     }
                 })
+            },
+
+            changeBands: function() {
+                var layer = this.model.get('layer');
+                var bands = this.$('#txt-bands').val().replace(/\s/g,'')
+                this.$('#txt-bands').val(bands)
+
+                // TODO: Input validation. How to get list or number of bands?
+                if (bands != layer.get('bands')) {
+                    layer.set('bands', bands);
+                    Communicator.mediator.trigger('map:layer:changeAttr', {name: layer.get('name')});
+                    this.updateDownloadLink();
+                }
             },
 
             changeLayers: function() {
