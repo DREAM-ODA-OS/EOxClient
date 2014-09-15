@@ -245,8 +245,8 @@
             }
           }, this));
           if (refds_count) {
-            window.alert("The download selection contais referenceable datasets (i.e., non-orthorectified RAW products). "+
-                " The selected CRS cannot be applied to these products and they will be delivered in their native RAW geometry.");
+            window.alert("The download selection contains referenceable datasets (i.e., non-orthorectified RAW products). "+
+                " The selected output CRS cannot be applied to these datasets and they will be delivered in their native RAW geometry.");
           }
         }
 
