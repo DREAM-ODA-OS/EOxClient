@@ -592,9 +592,8 @@ define(['backbone',
 	                }	
 				},
 
-				onTimeChange: function (time) {
-
-					this.timeinterval = time;
+                onTimeChange: function (time) {
+                    this.timeinterval = time;
 
                     //update routes
                     Communicator.mediator.trigger("router:setUrl", {
@@ -603,16 +602,17 @@ define(['backbone',
                         zoomLevel: this.map.zoom
                     });
 
-					var string = getISODateTimeString(time.start) + "/"+ getISODateTimeString(time.end);
-					
-					globals.products.each(function(product) {
-						if(product.get("timeSlider")){
-							var productLayer = this.map.getLayersByName(product.get("name"))[0];
-				      		productLayer.mergeNewParams({'time':string});
-						}
-				     
-				    }, this);
-				},
+                    var string = getISODateTimeString(time.start) + "/"+ getISODateTimeString(time.end);
+
+                    globals.products.each(function(product) {
+                        if(product.get("timeSlider")){
+                            var productLayer = this.map.getLayersByName(product.get("name"))[0];
+                            productLayer.mergeNewParams({'time':string});
+                        }
+                    }, this);
+
+                    Communicator.mediator.trigger("map:time:change", {star: time.start, end: time.end});
+                },
 
 				onGetMapExtent: function(){
 	            	return this.map.getExtent();

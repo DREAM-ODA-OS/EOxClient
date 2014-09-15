@@ -46,29 +46,30 @@
             className: "panel panel-default layer-options not-selectable",
             template: {type: 'handlebars', template: LayerOptionsTmpl},
 
-			events: {
+            events: {
             },
 
             initialize: function() {
                 var that = this
 
-				this.$slider = $('<div>').slider({
-			        range: "max",
-			        max: 100,
-			        min: 0,
+                this.$slider = $('<div>').slider({
+                    range: "max",
+                    max: 100,
+                    min: 0,
                     slide: function(evt, ui) {
                         that.$('#layer-options-opacity-value').html(ui.value+"%");
                         var layer = that.model.get('layer');
-		    	        layer.set("opacity", ui.value/100);
-		    	        Communicator.mediator.trigger('productCollection:updateOpacity', {model:layer, value:ui.value/100});
+                        layer.set("opacity", ui.value/100);
+                        Communicator.mediator.trigger('productCollection:updateOpacity', {model:layer, value:ui.value/100});
                     }
-			    });
-			    //this.$slider.width(100);
+                });
+                //this.$slider.width(100);
 
                 this.model.on('change:layer',this.update,this);
 
-			    this.listenTo(Communicator.mediator, "map:position:change", this.updateDownloadLink);
-			    this.listenTo(Communicator.mediator, "map:size:change", this.updateDownloadLink);
+                this.listenTo(Communicator.mediator, 'map:position:change', this.updateDownloadLink);
+                this.listenTo(Communicator.mediator, 'map:size:change', this.updateDownloadLink);
+                this.listenTo(Communicator.mediator, 'map:time:change', this.updateDownloadLink);
             },
 
             onShow: function (view) {
@@ -90,7 +91,7 @@
             },
 
             onClose: function() {
-		        this.$slider.detach();
+                this.$slider.detach();
             },
 
             update: function() {
@@ -126,8 +127,8 @@
                     layer: layer,
                     format: "image/tiff",
                     action: function(request){
-                        $a.attr('download', fname)
-                        $a.attr('href', request.url)
+                        $a.attr('download', fname);
+                        $a.attr('href', request.url);
                     }
                 })
             },
