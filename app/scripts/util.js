@@ -88,7 +88,7 @@ var getCoverageXML = function(coverageid, options) {
   options = options || {};
   subsetCRS = options.subsetCRS || "http://www.opengis.net/def/crs/EPSG/0/4326";
   var params = [
-    '<wcs:GetCoverage service="WCS" version="2.0.0" xmlns:wcs="http://www.opengis.net/wcs/2.0" xmlns:wcscrs="http://www.opengis.net/wcs/crs/1.0" xmlns:wcsmask="http://www.opengis.net/wcs/mask/1.0">',
+    '<wcs:GetCoverage service="WCS" version="2.0.0" xmlns:wcs="http://www.opengis.net/wcs/2.0" xmlns:wcscrs="http://www.opengis.net/wcs/crs/1.0" xmlns:wcsmask="http://www.opengis.net/wcs/mask/1.0" xmlns:wcsrsub="http://www.opengis.net/wcs/range-subsetting/1.0">',
     '<wcs:CoverageId>' + coverageid + '</wcs:CoverageId>',
   ], extension = [];
 
@@ -97,6 +97,14 @@ var getCoverageXML = function(coverageid, options) {
   if (options.bbox && !options.subsetX && !options.subsetY) {
     options.subsetX = [options.bbox[0], options.bbox[2]];
     options.subsetY = [options.bbox[1], options.bbox[3]];
+  }
+  if (options.rangeSubset) {
+    params.push('<wcs:Extension><wcsrsub:RangeSubset>');
+    for (var i = 0; i < options.rangeSubset.length; i++) {
+        params.push('<wcsrsub:RangeItem><wcsrsub:RangeComponent>'+
+            options.rangeSubset[i]+'</wcsrsub:RangeComponent></wcsrsub:RangeItem>');
+    }
+    params.push('</wcsrsub:RangeSubset></wcs:Extension>');
   }
   if (options.subsetX) {
     params.push('<wcs:DimensionTrim><wcs:Dimension>x</wcs:Dimension>' +

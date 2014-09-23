@@ -232,9 +232,7 @@
         */
 
         // Raise an alert in case of non-native output-CRS applied for referenceable data-sets.
-
         var cbx_list = this.$("#download-list").find('input[type="checkbox"]') ;
-
         if (options.outputCRS) {
           var refds_count = 0;
           cbx_list.each(_.bind(function(index) {
@@ -250,10 +248,49 @@
           }
         }
 
+        // raise an alert in case of JP2000 requests
+        if (options.format == 'image/jp2')
+        {
+            window.alert("JP2000 download is limited to 8bit Grayscale or RGB imagery.  The number of bands is therefore "+
+                "reduced to 1 or 3.  12 or 16bits output is not supported.  \nThe current draft of the WCS JP2000 encoding specification "+
+                "does not define a way how to pass any encoding parameters (e.g., quality factor).  The imagery is encoded using the "+
+                "server default values.");
+        }
+
+        // JP2000 RGB range subsetting
+        var _jp2_rgb = function(rtlist){
+            if (!rtlist.length) { return rtlist; }
+            if (rtlist.length < 3) { return [rtlist[0]]; }
+
+            //Try to interpret the range-type.
+            var idx_red = rtlist.indexOf('Red');
+            var idx_green = rtlist.indexOf('Green');
+            var idx_blue = rtlist.indexOf('Blue');
+            var idx_nir = rtlist.indexOf('NIR');
+
+            if ((idx_blue >= 0) && (idx_green >= 0) && (idx_red >= 0)) {
+                return ['Red', 'Green', 'Blue'] ;
+            }
+
+            if ((idx_nir >= 0) && (idx_green >= 0) && (idx_red >= 0)) {
+                return ['NIR', 'Red', 'Green'];
+            }
+
+            // Fallback to the firts 3 bands.
+            return [rtlist[0],rtlist[1],rtlist[2]];
+        }
+
+        options.format = this.$("#select-output-format").val();
+
         cbx_list.each(_.bind(function(index) {
           if (cbx_list[index].checked){
             var model = this.coverages.models[index];
             options.coverageSubtype = model.get('coverageSubtype');
+            if (options.format == 'image/jp2')
+                options.rangeSubset = _jp2_rgb(_.map(model.get('rangeType'), function(rt) { return rt.name } ));
+            else {
+                options.rangeSubset = null ;
+            }
             var xml = getCoverageXML(model.get('coverageId'), options);
             var owsUrl = model.get('url').split('?')[0];
             var $form = $(CoverageDownloadPostTmpl({url: owsUrl, xml: xml}));
