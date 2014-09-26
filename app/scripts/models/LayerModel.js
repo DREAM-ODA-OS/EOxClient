@@ -45,6 +45,11 @@
 			color: "",
 			time: null,
 			visible: null,
+            layers: null, // comma separated list of the currently displayed layers - defaults to the `view.id`
+            show_outlines: null, // display outlines for the product layers
+            strip_clouds: null, // make cloud covered areas trasparent
+            show_cloud_mask: null, // display cloud mask
+            bands: null, // custom band composition
 			opacity: 0,
 			view: {
 				id : '',
@@ -67,7 +72,7 @@
 				zoomOffset: null,
 				requestEncoding: 'KVP',
 				// extraLayers: optional key-value store of extra layers such as
-				//              {'outlines':'xy_outlines','cloudMask':'xy_clouds','masked':'yx_masked' ...}
+				//              {'outlines':'xy_outlines','cloudMask':'xy_cloud','masked':'yx_masked' ...}
 				extraLayers: {}
 			},
 
@@ -107,6 +112,11 @@
                 name: obj.name,
                 description: (obj.description ? obj.description: null),
                 visible: obj.visible,
+                layers: obj.view.id,
+                show_outlines: false,
+                strip_clouds: false,
+                show_cloud_mask: false,
+                bands: "",
                 timeSlider: obj.timeSlider,
                 // Default to WMS if no protocol is defined (allowed protocols: WMS|EOWCS|WPS)
                 timeSliderProtocol: obj.timeSliderProtocol ? obj.timeSliderProtocol : 'WMS',
@@ -158,6 +168,7 @@
             return new LayerModel({
                 name: obj.name,
                 visible: obj.visible,
+                layers: obj.id,
                 view: {
                     id : obj.id,
                     urls : obj.urls,
@@ -189,6 +200,7 @@
             return new LayerModel({
                 name: obj.name,
                 visible: obj.visible,
+                layers: obj.id,
                 view: {
                     id : obj.id,
                     urls : obj.urls,

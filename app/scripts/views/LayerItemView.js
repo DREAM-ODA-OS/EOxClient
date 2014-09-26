@@ -46,7 +46,8 @@
 				'drop' : 'drop',
 				'change': 'onChange',
 				'click .fa-adjust': 'onOpenSlider',
-				'slide .ui-slider': 'onOpacityAdjust'
+				'slide .ui-slider': 'onOpacityAdjust',
+                'click .form-control': 'onClick'
 			},
 
 			initialize: function(options) {
@@ -58,8 +59,8 @@
 			    });
 			    this.$slider.width(100);
 			},
-			onShow: function(view){
 
+			onShow: function(view){
 				$( ".sortable" ).sortable({
 					revert: true,
 					delay: 90,
@@ -83,7 +84,6 @@
         			trigger: 'manual'
     			});
 			},
-
 
 			onChange: function(evt){
                 var isBaseLayer = false;
@@ -171,7 +171,16 @@
 		    onOpacityAdjust: function(evt, ui) {
 		    	this.model.set("opacity", ui.value/100);
 		    	Communicator.mediator.trigger('productCollection:updateOpacity', {model:this.model, value:ui.value/100});
-		    }
+		    },
+
+            onClick: function(evt) {
+                if (this.model.get('visible')) {
+	                Communicator.mediator.trigger('layerOptions:setLayer', {model: this.model});
+	                Communicator.mediator.trigger('dialog:open:layerOptions');
+                } else {
+	                Communicator.mediator.trigger('dialog:close:layerOptions');
+                }
+            }
 
 		});
 		return {'LayerItemView':LayerItemView};

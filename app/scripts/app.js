@@ -40,6 +40,7 @@
 		'controller/ContentController',
 		'controller/DownloadController',
         'controller/LayerInfoController',
+        'controller/LayerOptionsController',
 		'controller/SelectionManagerController',
         'controller/IngestionAdminT5Controller',
         'controller/AddLocalProductController',

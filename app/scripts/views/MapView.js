@@ -44,7 +44,12 @@ define(['backbone',
 					this.map = new OpenLayers.Map({
 						div: "map",
 						fallThrough: true,
-						tileManager: this.tileManager
+						tileManager: this.tileManager,
+						controls: [
+						 	new OpenLayers.Control.Navigation(),
+	                        new OpenLayers.Control.Zoom( { zoomInId: "zoomIn", zoomOutId: "zoomOut" } ),
+	                        new OpenLayers.Control.Attribution( { displayClass: 'olControlAttribution' } )
+	                    ]
 					});
 
 					this.timeinterval = { start: null, end: null } ;
@@ -53,8 +58,6 @@ define(['backbone',
 
 					//listen to moeveend event in order to keep router uptodate
 					this.map.events.register("moveend", this.map, function(data) {
-
-                        console.log("moveend");
 
                         Communicator.mediator.trigger("router:setUrl", {
                             time: mapView.timeinterval,
@@ -65,8 +68,13 @@ define(['backbone',
 			            Communicator.mediator.trigger("map:position:change", data.object.getExtent());
 			        });
 
+                    this.map.events.register("updatesize", this.map, function(data) {
+                        Communicator.mediator.trigger("map:size:change", data.object.getSize());
+                    });
+
 					this.listenTo(Communicator.mediator, "map:center", this.centerMap);
 					this.listenTo(Communicator.mediator, "map:layer:change", this.changeLayer);
+					this.listenTo(Communicator.mediator, "map:layer:changeAttr", this.changeLayerAttributes);
 					this.listenTo(Communicator.mediator, 'map:set:extent', this.onSetExtent);
 					this.listenTo(Communicator.mediator, "productCollection:sortUpdated", this.onSortProducts);
 					this.listenTo(Communicator.mediator, "productCollection:updateOpacity", this.onUpdateOpacity);
@@ -78,6 +86,7 @@ define(['backbone',
 					this.listenTo(Communicator.mediator, 'selection:bbox:changed', this.onSelectionBBoxChanged);
 					this.listenTo(Communicator.mediator, 'map:marker:set', this.setMarker);
 					this.listenTo(Communicator.mediator, 'map:marker:clearAll', this.clearMarkers);
+					this.listenTo(Communicator.mediator, 'map:layer:save', this.getLayerURL);
 
 					Communicator.reqres.setHandler('map:get:extent', _.bind(this.onGetMapExtent, this));
 					Communicator.reqres.setHandler('get:selection:json', _.bind(this.onGetGeoJSON, this));
@@ -176,6 +185,10 @@ define(['backbone',
 					//Set attributes of map based on mapmodel attributes
 				    var mapmodel = globals.objects.get('mapmodel');
 				    this.map.setCenter(new OpenLayers.LonLat(mapmodel.get("center")), mapmodel.get("zoom") );
+
+                    // signal the initial map size
+                    Communicator.mediator.trigger("map:size:change", this.map.getSize());
+
 				    return this;
 				},
 				//method to create layer depending on protocol
@@ -207,6 +220,7 @@ define(['backbone',
 						        zoomOffset: layer.zoomOffset,
 						        visible: layerdesc.get("visible"),
 						        time: layerdesc.time,
+						        attribution: layer.attribution,
 						        requestEncoding: layer.requestEncoding
 							});
 							break;
@@ -216,7 +230,7 @@ define(['backbone',
 								layerdesc.get("name"),
 						        layer.urls[0],
 						        {
-						        	layers: layer.id,
+						        	layers: layerdesc.get('layers'), // NOTE: the WMS layers can be changed by the client.
 						        	transparent: "true",
         							format: "image/png",
         							time: layer.time
@@ -237,7 +251,8 @@ define(['backbone',
 							        isBaseLayer: layer.isBaseLayer,
 							        wrapDateLine: layer.wrapDateLine,
 							        zoomOffset: layer.zoomOffset,
-							        visibility: layerdesc.get("visible")
+							        visibility: layerdesc.get("visible"),
+							        attribution: layer.attribution
 							    }
 							);
 							break;
@@ -276,6 +291,21 @@ define(['backbone',
 					}
 				},
 
+                changeLayerAttributes: function(options) {
+                    var product = globals.products.find(function(model){return model.get('name') == options.name;});
+                    if (!product) return ;
+                    var view = product.get('view');
+
+                    var new_params = {};
+
+                    if (view && (view.protocol="WMS")) {
+                        new_params['layers'] = product.get('layers');
+                        new_params['dim_bands'] = product.get('bands') ? product.get('bands') : null;
+                    }
+
+                    this.map.getLayersByName(options.name)[0].mergeNewParams(new_params);
+                },
+
 				onSortProducts: function(productLayers) {
 				    globals.products.each(function(product) {
 				      var productLayer = this.map.getLayersByName(product.get("name"))[0];
@@ -290,8 +320,6 @@ define(['backbone',
 					if (layer){
 						layer.setOpacity(options.value);
 					}
-					
-
 				},
 
 				onSelectionActivated: function(arg){
@@ -347,6 +375,58 @@ define(['backbone',
 
                 clearMarkers: function() {
                     this.markerLayer.clearMarkers();
+                },
+
+                getLayerURL: function(obj) {
+                    //TODO: move to global map configuration
+                    var map_crs_reverse_axes = true;
+
+                    function getMapWMS13(layer, prm)
+                    {
+                        return {
+                            prm: prm,
+                            url: layer.get('view').urls[0] +
+                                '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap' +
+                                '&LAYERS=' + layer.get('layers') +
+                                '&BBOX=' + prm.bbox.toBBOX(10,map_crs_reverse_axes) + '&CRS=' + prm.crs +
+                                '&TIME=' + getISODateTimeString(prm.time.start) + '/' + getISODateTimeString(prm.time.end) +
+                                '&HEIGHT=' + prm.size.h + '&WIDTH=' + prm.size.w + "&TRANSPARENT=true" + "&STYLES=" +
+                                '&FORMAT=' + prm.format + (layer.get('bands') ? '&DIM_BANDS='+layer.get('bands') : "")
+                            /*
+                            url: layer.get('view').urls[0],
+                            query: {
+                                SERVICE: 'WMS',
+                                VERSION: '1.3.0',
+                                REQUEST: 'GetMap',
+                                LAYERS: layer.get('layers'),
+                                BBOX: prm.bbox.toBBOX(10,map_crs_reverse_axes),
+                                CRS: prm.crs,
+                                TIME: getISODateTimeString(prm.time.start)+'/'+ getISODateTimeString(prm.time.end),
+                                HEIGHT: String(prm.size.h),
+                                WIDTH: String(prm.size.w),
+                                TRANSPARENT: 'true',
+                                STYLES: '',
+                                FORMAT: prm.format,
+                                DIM_BANDS: layer.get('bands') ? layer.get('bands') : null,
+                            }
+                            */
+                        }
+                    }
+
+                    // request Parameters
+                    var prm = {
+                        time: {
+                            start: this.timeinterval.start,
+                            end: this.timeinterval.end
+                        },
+                        bbox: this.map.getExtent(),
+                        crs: this.map.projection,
+                        size: this.map.getSize(),
+                        format: obj.format
+                    };
+
+                    // run the passed callback
+                    obj.action(getMapWMS13(obj.layer, prm))
                 },
 
                 onMapClick: function(clickEvent){
@@ -519,9 +599,8 @@ define(['backbone',
 	                }	
 				},
 
-				onTimeChange: function (time) {
-
-					this.timeinterval = time;
+                onTimeChange: function (time) {
+                    this.timeinterval = time;
 
                     //update routes
                     Communicator.mediator.trigger("router:setUrl", {
@@ -530,16 +609,17 @@ define(['backbone',
                         zoomLevel: this.map.zoom
                     });
 
-					var string = getISODateTimeString(time.start) + "/"+ getISODateTimeString(time.end);
-					
-					globals.products.each(function(product) {
-						if(product.get("timeSlider")){
-							var productLayer = this.map.getLayersByName(product.get("name"))[0];
-				      		productLayer.mergeNewParams({'time':string});
-						}
-				     
-				    }, this);
-				},
+                    var string = getISODateTimeString(time.start) + "/"+ getISODateTimeString(time.end);
+
+                    globals.products.each(function(product) {
+                        if(product.get("timeSlider")){
+                            var productLayer = this.map.getLayersByName(product.get("name"))[0];
+                            productLayer.mergeNewParams({'time':string});
+                        }
+                    }, this);
+
+                    Communicator.mediator.trigger("map:time:change", {star: time.start, end: time.end});
+                },
 
 				onGetMapExtent: function(){
 	            	return this.map.getExtent();
