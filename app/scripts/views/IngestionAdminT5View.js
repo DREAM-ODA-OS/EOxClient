@@ -161,16 +161,17 @@
                         for (var i=0; i<scenarios.length; i++)
                         {
                             var ncn_id = scenarios[i].ncn_id;
+                            var enc_id = ncn_id.replace(".","\\.");
                             var sc_id  = scenarios[i].id;
 
-                            that.$('#btn-ingest-scenario-' + ncn_id).on
+                            that.$('#btn-ingest-scenario-' + enc_id).on
                                 ("click", _.bind(that.run_iet5_ajax, that, "ingestScenario", "Ingest", sc_id, ncn_id));
-                            that.$('#btn-delete-scenario-' + ncn_id).on
+                            that.$('#btn-delete-scenario-' + enc_id).on
                                 ("click", _.bind(that.run_iet5_ajax, that, "deleteScenario", "Delete", sc_id, ncn_id));
-                            that.$('#btn-stop-scenario-'   + ncn_id).on
+                            that.$('#btn-stop-scenario-'   + enc_id).on
                                 ("click", _.bind(that.run_iet5_ajax, that, "stopScenario",    "Stop",  sc_id, ncn_id));
-                            that.$('#btn-add-product-'     + ncn_id).on("click",  _.bind(that.onAddLocalProduct, that, sc_id, ncn_id));
-                            that.$('#btn-edit-scenario-'   + ncn_id).on("click",  _.bind(that.onEditScenario,    that, ncn_id));
+                            that.$('#btn-add-product-'     + enc_id).on("click",  _.bind(that.onAddLocalProduct, that, sc_id, ncn_id));
+                            that.$('#btn-edit-scenario-'   + enc_id).on("click",  _.bind(that.onEditScenario,    that, ncn_id));
 
                         }
                     }
@@ -186,7 +187,7 @@
                         return;
                     }
 
-                    if (ss.st_isav==0) {
+                    if (op != 'Stop' && ss.st_isav==0) {
                         alert('Scenario '+ncn_id+'is locked - operation in progress');
                         return;
                     }
@@ -196,6 +197,8 @@
                         var req = $.get(url);
 
                         this.change_pending = true;
+                        if (op == 'Stop') { this.change_pending = false; }
+
                         req.success(_.bind(function(result) {
                                     var st = JSON.parse(result).status;
                                     console.log("IngAdmT5: Axax status: " + st);
