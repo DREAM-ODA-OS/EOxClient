@@ -188,7 +188,7 @@
                     }
 
                     if (op != 'Stop' && ss.st_isav==0) {
-                        alert('Scenario '+ncn_id+'is locked - operation in progress');
+                        alert('Scenario '+ncn_id+' is locked - operation in progress');
                         return;
                     }
 

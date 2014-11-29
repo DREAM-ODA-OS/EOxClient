@@ -1,157 +1,267 @@
-(function() 
-{
-    'use strict';
+(function() {
+  'use strict';
 
-    var root = this;
+  // Helper collection to keep maintain data of coverage set
+  var EOCoverageSet = Backbone.Collection.extend({
+    fetch: function(options) {
+      options || (options = {});
+      options.dataType = "xml";
+      return Backbone.Collection.prototype.fetch.call(this, options);
+    },
+    parse: function(response) {
+      return WCS.Core.Parse.parse(response).coverageDescriptions;
+    },
+  });
 
-    root.define(
-    
-        [
-            'backbone',
-            'communicator',
-            'hbs!tmpl/OrthoQuality',
-            'underscore',
-            "bootstrap-datepicker"
-        ],
+  var root = this;
+  root.define([
+    'backbone',
+    'communicator',
+    'globals',
+    'models/DownloadModel',
+    'hbs!tmpl/OrthoQuality',
+    'hbs!tmpl/SelectCoverageListItem',
+    'hbs!tmpl/CoverageInfo',
+    'hbs!tmpl/CoverageDownloadPost',
+    'underscore'
+  ],
+  function( Backbone, Communicator, globals, m, OrthoQualityTmpl,
+   SelectCoverageListItemTmpl, CoverageInfoTmpl,CoverageDownloadPostTmpl) {
 
-        function( Backbone, Communicator, OrthoQualityTmpl )
-        {
+    //var qtmpUrl = "http://dream.eox.at/q1/pq.html";
+    //var qtmpUrl = "http://127.0.0.1/qss/index.html";
 
-            var OrthoQualityView = Backbone.Marionette.CompositeView.extend(
-            {  
+    function getQUrl(key) {
+        var q_options = globals.objects.get('orthoQualityConfig');
+        return q_options[key];
+    };
 
-                tagName: "div",
-                className: "panel panel-default downloadselection not-selectable",
-                template: {type: 'handlebars', template: OrthoQualityTmpl},
-                events:
-                {
-                    'click #btn-draw-bbox':'onBBoxClick',
-                    "click #btn-clear-bbox" : 'onClearClick',
-                    "click #btn-download" : 'onDownloadClick',
-                    "change #txt-minx" : "onBBoxChange",
-                    "change #txt-maxx" : "onBBoxChange",
-                    "change #txt-miny" : "onBBoxChange",
-                    "change #txt-maxy" : "onBBoxChange",
-                    'changeDate': "onChangeDate"
-                },
+    var OrthoQualityView = Backbone.Marionette.ItemView.extend({
+      tagName: "div",
+      id: "modal-start-otrhoquality",
+      className: "panel panel-default download",
+      template: {
+          type: 'handlebars',
+          template: OrthoQualityTmpl
+      },
 
-                /*initialize: function  (model) {
-                    this.times = model.get("ToI");
-                },      */
+      modelEvents: {
+        "reset": "onCoveragesReset"
+      },
 
-                onShow: function (view)
-                {
+      events: {
+        //"click #btn-select-all-coverages": "onSelectAllCoveragesClicked",
+        //"click #btn-invert-coverage-selection": "onInvertCoverageSelectionClicked",
+        //"click #btn-refresh-list": "onRefreshClick",
+        "click #btn-modify-selection": "onModifyClick",
+        //"click #btn-start-download": "onStartDownloadClicked"
+      },
 
-                    this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
-                    this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
+      initialize: function(options) {
+        this.coverages = new Backbone.Collection([]);
+      },
 
-                    this.$('.close').on("click", _.bind(this.onClose, this));
-                    this.$el.draggable(
-                    { 
-                        containment: "#content" ,
-                        scroll: false,
-                        handle: '.panel-heading'
-                    });
+      onShow: function(view){
 
-                    this.$('#div-date-begin input[type="text"]').datepicker({autoclose: true, format: "dd/mm/yyyy"});
-                    this.$('#div-date-begin input[type="text"]').datepicker('update', this.model.get('ToI').start);
-                    this.$('#div-date-begin input[type="text"]').datepicker('setDate', this.model.get('ToI').start);
+        this.$('#download-alert').html("Search in progress ...");
 
-                    this.$('#div-date-end input[type="text"]').datepicker({autoclose: true, format: "dd/mm/yyyy"});
-                    this.$('#div-date-end input[type="text"]').datepicker('update', this.model.get('ToI').end);
+        this.listenTo(this.coverages, "reset", this.onCoveragesReset);
+        this.$('.close').on("click", _.bind(this.onClose, this));
+        this.$el.draggable({ 
+          containment: "#content",
+          scroll: false,
+          handle: '.panel-heading'
+        });
 
-                    $(document).on('touch click', '#div-date-begin .input-group-addon', 
-                        function(e){$('input[type="text"]', $(this).parent()).focus();});
+        this.$('#btn-q-improve').on("click", _.bind(this.onImprove, this));
+        this.$('#btn-q-assess').on("click", _.bind(this.onAssess, this));
 
-                    $(document).on('touch click', '#div-date-end .input-group-addon',
-                        function(e){ $('input[type="text"]', $(this).parent()).focus(); });
+        var $downloadList = this.$("#download-list");
+        $downloadList.children().remove();
 
-                },
 
-                onBBoxClick: function() 
-                {
-                    $("#txt-minx").val("");
-                    $("#txt-maxx").val("");
-                    $("#txt-miny").val("");
-                    $("#txt-maxy").val("");
-                    Communicator.mediator.trigger('selection:activated',{id:"bboxSelection",active:true});
-                },
+        var coverageSets = _.map(this.model.get('products'), function(product, key) {
+          var set = new EOCoverageSet([]);
+          var options = {};
 
-                onClearClick: function () 
-                {
-                    Communicator.mediator.trigger('selection:activated',{id:"bboxSelection",active:false});
-                    $("#txt-minx").val("");
-                    $("#txt-maxx").val("");
-                    $("#txt-miny").val("");
-                    $("#txt-maxy").val("");
-                },
+          if(product.get('timeSlider')){
+            options = {
+                subsetTime: [
+                  getISODateTimeString(this.model.get("ToI").start),
+                  getISODateTimeString(this.model.get("ToI").end)
+                ]
+            };
+          } //TODO: Check what to set if timeslider not activated
 
-                onDownloadClick: function ()
-                {
-                    Communicator.mediator.trigger("dialog:open:download", true);
-                },
+          options.subsetCRS = "http://www.opengis.net/def/crs/EPSG/0/4326";
+          var bbox = this.model.get("AoI");
+          options.subsetX = [bbox.left, bbox.right];
+          options.subsetY = [bbox.bottom, bbox.top];
 
-                onTimeChange: function (time)
-                {
-                    this.$('#div-date-begin input[type="text"]').datepicker('update', this.model.get('ToI').start);
-                    this.$('#div-date-end input[type="text"]').datepicker('update', this.model.get('ToI').end);
-                },
+          // TODO: Check for download protocol !
+          set.url = WCS.EO.KVP.describeEOCoverageSetURL(product.get('download').url, key, options);
+          return set;
+        }, this);
 
-                onChangeDate: function (evt) 
-                {
-                    var opt = 
-                    {
-                        start: this.$('#div-date-begin input[type="text"]').datepicker('getDate'),
-                        end: this.$('#div-date-end input[type="text"]').datepicker('getDate')
-                    };
-                    Communicator.mediator.trigger('date:selection:change', opt);
-                },
+        // dispatch WCS DescribeEOCoverageSet requests
+        var deferreds = _.invoke(coverageSets, "fetch");
 
-                onSelectionChange: function (obj) 
-                {
-                    if (obj)
-                    {
-                        $("#txt-minx").val(obj.bounds.left);
-                        $("#txt-maxx").val(obj.bounds.right);
-                        $("#txt-miny").val(obj.bounds.bottom);
-                        $("#txt-maxy").val(obj.bounds.top);
-                    }
-                    
-                },
+        $.when.apply($, deferreds).done(_.bind(function() {
+          _.each(coverageSets, function(set) {
+            set.each(function(model) {
+              model.set("url", set.url)
+            });
+          });
+          var coverage = _.flatten(_.pluck(coverageSets, "models"));
+          this.coverages.reset(coverage);
+        }, this));
+      },
 
-                onBBoxChange: function (event) 
-                {
+      onRefreshClick: function () {
+	  	Communicator.mediator.trigger("dialog:open:orthoQuality", false);
+	    Communicator.mediator.trigger("dialog:open:orthoQualitySelection", true);
+      },
 
-                    var values = 
-                    {
-                        left: parseFloat($("#txt-minx").val()),
-                        right: parseFloat($("#txt-maxx").val()),
-                        bottom: parseFloat($("#txt-miny").val()),
-                        top: parseFloat($("#txt-maxy").val())
-                    };
+      onModifyClick: function () {
+		Communicator.mediator.trigger("dialog:open:orthoQuality", false);
+        this.close();
+		Communicator.mediator.trigger("dialog:open:orthoQualitySelection");
+   	  },
 
-                    if(!isNaN(values.left) && !isNaN(values.right) &&
-                        !isNaN(values.bottom) && !isNaN(values.top) )
-                    {
-                        
-                        if ( !(values.left > values.right || values.bottom > values.top))
-                        {
-                            Communicator.mediator.trigger('selection:bbox:changed',values);
-                        }
-                    }
-                },
+      onSelectAllCoveragesClicked: function() {
+        // select all coverages
+        this.$('input[type="checkbox"]').prop("checked", true).trigger("change");
+      },
 
-                onClose: function() 
-                {
-                    this.close();
-                }
-                
-            }); /* end of OrthoQualityView = Backbone.Marionette.CompositeView.extend() */
+      onInvertCoverageSelectionClicked: function() {
+        this.$('input[type="checkbox"]').each(function() {
+          var $this = $(this);
+          $this.prop("checked", !$this.is(":checked")).trigger("change");
+        });
+      },
 
-            return {'OrthoQualityView':OrthoQualityView};
+      onCoveragesReset: function() {
+        var $downloadList = this.$("#download-list");
+        var $infoFrame = this.$("#download-info-frame");
+        var layers = globals.products.filter(function(model) { return model.get('visible'); });
 
-        } /* end of function() */
+        this.$('#download-alert').html(this.coverages.length > 0 ? "" : "No coverage matching the selection found.");
 
-    ); /* end of root.define() */
+        this.coverages.each(function(coverage) {
+          var coverageJSON = coverage.toJSON();
+          var $html = $(SelectCoverageListItemTmpl(coverageJSON));
+          var infoURL = coverage.get('url').split('?')[0] +
+              "?SERVICE=WPS&VERSION=1.0.0&REQUEST=Execute&IDENTIFIER=getCoverageInfo" +
+              "&RawDataOutput=info&DATAINPUTS=identifier%3D" + coverage.get("coverageId")
+          $downloadList.append($html);
+          if (coverage.get("coverageSubtype") != "RectifiedDataset") {
+            $html.find("#cov-info-flag").html("&nbsp;[RAW]")
+          }
+          $html.find("i").popover({
+            trigger: "hover",
+            html: true,
+            content: CoverageInfoTmpl(coverageJSON),
+            title: "Coverage Description",
+            placement: "bottom"
+          });
+          var $i = $html.find("i")
+          $i.css("font-size","1em")
+          $i.click(function(){
+            $downloadList.find("i").css("color","black")
+            $i.css("color","red")
+            //$infoFrame.attr('srcdoc',response.data); // HTML5 feature - overides 'src' attribute when supported by the browser
+            $infoFrame.attr('src', infoURL);
+            return false;
+          });
+        }, this);
+      },
 
+      getProductsList: function() {
+        // for each selected coverage start a quality process
+        var $downloads = $("#div-downloads");
+        var options = {};
+
+        var bbox = this.model.get("AoI");
+        if (this.$('#select-output-clipping').is(":checked")) {
+            options.subsetX = [bbox.left, bbox.right];
+            options.subsetY = [bbox.bottom, bbox.top];
+        }
+
+        var cbx_list = this.$("#download-list").find('input[type="checkbox"]') ;
+
+        var products = []
+        cbx_list.each(_.bind(function(index) {
+          if (cbx_list[index].checked){
+            var model = this.coverages.models[index];
+            //options.coverageSubtype = model.get('coverageSubtype');
+            var coverageId = model.get('coverageId');
+            console.log("coverageId: "+coverageId);
+            products.push(coverageId);
+          }
+        }, this));
+
+        return products;
+      },
+
+      onImprove: function ()
+      {
+          var product = this.getProductsList()[0];  // take the first one
+          var resolution = 5;
+          var crs_code   = 'EPSG:32631';
+          if (null == product) {
+              alert('No product selected');
+              return;
+          }
+          
+          var qw_url = getQUrl('qtmpUrl') + "?qop=i" +
+                   "&res="+resolution+
+                   "&crs="+crs_code+
+                   "&prod="+product;
+          window.open(qw_url, "", "width=390,height=280,resizable=1");
+
+          /*
+          var jqr = $.ajax({
+                  url: getQUrl('qtmpUrl'),
+                  data: {
+                      qop: "i",
+                      res: resolution,
+                      crs: crs_code,
+                      prod: product
+                  },
+                  error : function(ret_jqxhr, status, err){
+                      console.log("improveQuality request failed; st="+status);
+                      console.log("improveQuality err: "+err);
+                      alert("improveQuality request failed: '"+status+"'");
+                  },
+                  success : function(data, status, ret_jqxhr){
+                      console.log("invoked improveQuality on server, st="+status);
+                      alert("improveQuality asynch running: "+status);
+                  },
+                  complete : function(ret_jqxhr, status ){
+                      console.log("improveQuality req status:"+status);
+                  }
+              });
+          */
+      },
+
+      onAssess: function ()
+      {
+          var product = this.getProductsList()[0];  // take the first one
+          if (null == product) {
+              alert('No product selected');
+              return;
+          }
+          var qw_url = getQUrl('qtmpUrl') + "?qop=a" +
+                   "&prod="+product;
+          window.open(qw_url, "", "width=390,height=280,resizable=1");
+      },
+
+      onClose: function() {
+                //Communicator.mediator.trigger("ui:close", "download");
+        this.close();
+      }
+
+    });
+    return {'OrthoQualityView':OrthoQualityView};
+  });
 }).call( this );
