@@ -15,7 +15,7 @@
   },
 
   "orthoQualityConfig": {
-     "qtmpUrl" : "http://dream.eox.at/q1/pq.html"
+     "qtmpUrl" : null
   },
 
   "mapConfig": {
