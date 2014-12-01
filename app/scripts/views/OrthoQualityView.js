@@ -52,7 +52,7 @@
       events: {
         //"click #btn-select-all-coverages": "onSelectAllCoveragesClicked",
         //"click #btn-invert-coverage-selection": "onInvertCoverageSelectionClicked",
-        //"click #btn-refresh-list": "onRefreshClick",
+        "click #btn-refresh-list": "onRefreshClick",
         "click #btn-modify-selection": "onModifyClick",
         //"click #btn-start-download": "onStartDownloadClicked"
       },
@@ -206,8 +206,10 @@
       onImprove: function ()
       {
           var product = this.getProductsList()[0];  // take the first one
-          var resolution = 5;
-          var crs_code   = 'EPSG:32631';
+
+          var resolution = this.$("#select-resolution").val(); //5;
+          var crs_code   = this.$("#select-output-crs").val(); //'EPSG:32631';
+
           if (null == product) {
               alert('No product selected');
               return;
