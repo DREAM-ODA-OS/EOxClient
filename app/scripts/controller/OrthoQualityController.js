@@ -60,13 +60,12 @@
                     this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
                     this.listenTo(Communicator.mediator, "selection:bbox:changed", this.onBBoxChange);
                     this.listenTo(Communicator.mediator, "dialog:open:orthoQuality", this.onOrthoQualityOpen);
-                    this.listenTo(Communicator.mediator, "dialog:open:orthoQualitySelection", this.onOthroQualitySelectionOpen);
+                    this.listenTo(Communicator.mediator, "dialog:open:orthoQualitySelection", this.onOrthoQualitySelectionOpen);
                     this.listenTo(Communicator.mediator, "dialog:close:orthoQualitySelection", this.onOrthoQualitySelectionClose);
                     this.listenTo(Communicator.mediator, "dialog:toggle:orthoQualitySelection", this.onOrthoQualitySelectionToggle);
 
                     // instantiate component's view
                     this.view = new qs.OrthoQualitySelectionView({model:this.model});
-                    console.log(" ** this.view="+this.view);
                 },
 
                 // event handlers ...
@@ -123,7 +122,6 @@
 
                 onOrthoQualityOpen: function (toOpen)
                 {
-                    console.log("onOrthoQualityOpen"+toOpen);
                     if(toOpen){
                         App.viewContent.show(new v.OrthoQualityView({model:this.model}));
                     }
@@ -143,12 +141,11 @@
                     }
                 },
 
-                onOrthoQualitySelectionToggle: function (event)
-                {
-                    if (this.isOrthoQualitySelectionClosed() ) {  
-                        App.viewContent.show(this.view);
+                onOrthoQualitySelectionToggle: function (event_) {
+                    if ( this.isOrthoQualitySelectionClosed() ) {
+                        this.onOrthoQualitySelectionOpen(event_);
                     } else {
-                        this.view.close();
+                        this.onOrthoQualitySelectionClose(event_);
                     }
                 }
 

@@ -18,13 +18,13 @@
   <p>
     resolution:
     <select class="input-small" id="select-resolution" title="Resolution for the Orthrectify process - should match that of the raw input image.">
-      <option value="20">20</option>
-      <option value="10">10</option>
-      <option value="5" selected>5</option>
-      <option value="2.5">2.5</option>
+      <option value="20">20.0&nbsp;m</option>
+      <option value="10">10.0&nbsp;m</option>
+      <option value="5" selected>&nbsp;5.0&nbsp;m</option>
+      <option value="2.5">&nbsp;2.5&nbsp;m</option>
     </select>
     &nbsp;&nbsp;projection:
-    <select class="input-medium" id="select-output-crs" title="Select the CRS for orthorectification.">
+    <select class="input-medium" id="select-output-crs" title="Select the CRS of the ortho-rectified product.">
       <option value="epsg:4326">Geog. Lat/Lon / WGS84 (EPSG:4326)</option>
       <option value="epsg:3857">Spherical Mercator(EPSG:3857)</option>
       <option value="epsg:3034">ETRS-LCC (EPSG:3034)</option>
@@ -159,8 +159,11 @@
       <option value="epsg:32760">UTM 60S / WGS84 (EPSG:32760)</option>
     </select>
     &nbsp;&nbsp;
-  <button class="btn btn-default" id="btn-q-improve"><i class="icon-white icon-download-alt" title="Orthorectification."></i>Improve Quality</button>
-  <button class="btn btn-default" id="btn-q-assess"><i class="icon-white icon-download-alt"></i>Assess Quality</button>
-    <!-- button type="button" class="btn btn-default" id="btn-modify-selection" title="Return to the time and area specification."><i class="fa fa-fw fa-edit"></i> Modify</button -->
+  </p>
+  <p>
+    <button class="btn btn-primary" id="btn-q-improve" style="float:right;margin-left:1ex;"><i class="icon-white icon-download-alt" title="Orthorectification."></i>Improve Quality</button>
+    <button class="btn btn-primary" id="btn-q-assess" style="float:right;"><i class="icon-white icon-download-alt"></i>Assess Quality</button>
+    <button type="button" class="btn btn-default" id="btn-refresh-dq-list" title="Refresh the list of the matching datasets (e.g., after modified layer selection)."><i class="fa fa-fw fa-refresh"></i> Refresh</button>
+    <button type="button" class="btn btn-default" id="btn-modify-dq-selection" title="Return to the time and area specification."><i class="fa fa-fw fa-edit"></i> Modify</button>
   </p>
 </div>

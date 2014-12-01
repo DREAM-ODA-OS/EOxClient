@@ -28,9 +28,6 @@
   function( Backbone, Communicator, globals, m, OrthoQualityTmpl,
    SelectCoverageListItemTmpl, CoverageInfoTmpl,CoverageDownloadPostTmpl) {
 
-    //var qtmpUrl = "http://dream.eox.at/q1/pq.html";
-    //var qtmpUrl = "http://127.0.0.1/qss/index.html";
-
     function getQUrl(key) {
         var q_options = globals.objects.get('orthoQualityConfig');
         return q_options[key];
@@ -52,8 +49,8 @@
       events: {
         //"click #btn-select-all-coverages": "onSelectAllCoveragesClicked",
         //"click #btn-invert-coverage-selection": "onInvertCoverageSelectionClicked",
-        "click #btn-refresh-list": "onRefreshClick",
-        "click #btn-modify-selection": "onModifyClick",
+        "click #btn-refresh-dq-list": "onRefreshClick",
+        "click #btn-modify-dq-selection": "onModifyClick",
         //"click #btn-start-download": "onStartDownloadClicked"
       },
 
@@ -118,15 +115,15 @@
       },
 
       onRefreshClick: function () {
-	  	Communicator.mediator.trigger("dialog:open:orthoQuality", false);
-	    Communicator.mediator.trigger("dialog:open:orthoQualitySelection", true);
+        Communicator.mediator.trigger("dialog:open:orthoQuality", false);
+        Communicator.mediator.trigger("dialog:open:orthoQuality", true);
       },
 
       onModifyClick: function () {
-		Communicator.mediator.trigger("dialog:open:orthoQuality", false);
+        Communicator.mediator.trigger("dialog:open:orthoQuality", false);
         this.close();
-		Communicator.mediator.trigger("dialog:open:orthoQualitySelection");
-   	  },
+        Communicator.mediator.trigger("dialog:open:orthoQualitySelection");
+      },
 
       onSelectAllCoveragesClicked: function() {
         // select all coverages
