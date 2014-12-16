@@ -206,7 +206,7 @@ div#preload {
  */
 
 .navbar-opaque{
-    opacity: 0.95;
+    opacity: 0.92;
 }
 
 /*
@@ -479,7 +479,7 @@ button[active=active] {
 	height: 100%;
 	width: 100%;
 	position: absolute;
-  padding-top: 50px !important;
+  //padding-top: 50px !important;
 }
 
 #leftSideBar {
@@ -525,8 +525,8 @@ button[active=active] {
 	//position: relative;
 }
 
-#OpenLayers_Control_Zoom_5 {
-	top: 60px;
+.olControlZoom {
+	top: 60px !important;
 }
 
 .tab-header {

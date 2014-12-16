@@ -1,57 +1,169 @@
 <div class="panel-heading">
     <button type="button" class="close"><i class="fa fa-times-circle"></i></button>
-    <h3 class="panel-title"><i class="fa fa-fw fa-download"></i> Ortho Quality </h3>
+    <h3 class="panel-title"><i class="fa fa-fw fa-thumbs-up"></i> Quality</h3>
 </div>
 
-<div class="panel-body"">
+<table>
+  <tr>
+    <td class="panel-left">
+    <div class="panel-body">
+      <div id="download-alert"></div>
+      <div id="download-list"></div>
+    </div></td>
+    <td class="panel-right"><iframe class="panel-info" id="download-info-frame"></iframe></td>
+  </tr>
+</table>
 
-  <div class="input-group">
-    <span class="input-group-addon fixed-sized-addon">Min X</span>
-    <input type="text" class="form-control" placeholder="min-x" id="txt-minx">
-  </div>
-
-  <div class="input-group">
-    <span class="input-group-addon fixed-sized-addon">Min Y</span>
-    <input type="text" class="form-control" placeholder="min-y" id="txt-miny">
-  </div>
-
-  <div class="input-group">
-    <span class="input-group-addon fixed-sized-addon">Max X</span>
-    <input type="text" class="form-control" placeholder="max-x" id="txt-maxx">
-  </div>
-
-  <div class="input-group">
-    <span class="input-group-addon fixed-sized-addon">Max Y</span>
-    <input type="text" class="form-control" placeholder="max-y" id="txt-maxy">
-  </div>
-
-  <div class="btn-group input-group-level btn-block" style="width:100%;">
-    <button type="button" class="btn btn-default" id="btn-draw-bbox" style="width:85%;">Draw Bounding Box</button>
-    <button type="button" class="btn btn-default" id="btn-clear-bbox" style="width:15%;"><i class="fa fa-trash-o"></i></button>
-  </div>
-
-    
-  <h6>Date Range</h6>
-
-  <div class="input-group input-prepend input-append date" id="div-date-begin">
-    <span class="input-group-addon fixed-sized-addon">Start</span>
-    <input type="text" class="form-control" placeholder="begin time" id="txt-date-begin">
-    <span class="input-group-addon">
-        <i class="fa fa-calendar"></i>
-    </span>
-  </div>
-
-  <div class="input-group input-prepend input-append date" id="div-date-end">
-    <span class="input-group-addon fixed-sized-addon">End</span>
-    <input type="text" class="form-control" placeholder="end time" id="txt-date-end">
-    <span class="input-group-addon">
-        <i class="fa fa-calendar"></i>
-    </span>
-  </div>
-
-
-
-</div>
 <div class="panel-footer">
-  <button class="btn btn-block btn-primary" id="btn-download"  href="#modal-start-download"><i class="icon-white icon-download-alt"></i>Download</button>
+  <p>
+    resolution:
+    <select class="input-small" id="select-resolution" title="Resolution for the Orthrectify process - should match that of the raw input image.">
+      <option value="20">20.0&nbsp;m</option>
+      <option value="10">10.0&nbsp;m</option>
+      <option value="5" selected>&nbsp;5.0&nbsp;m</option>
+      <option value="2.5">&nbsp;2.5&nbsp;m</option>
+    </select>
+    &nbsp;&nbsp;projection:
+    <select class="input-medium" id="select-output-crs" title="Select the CRS of the ortho-rectified product.">
+      <option value="epsg:4326">Geog. Lat/Lon / WGS84 (EPSG:4326)</option>
+      <option value="epsg:3857">Spherical Mercator(EPSG:3857)</option>
+      <option value="epsg:3034">ETRS-LCC (EPSG:3034)</option>
+      <option value="epsg:3035">ETRS-LAEA (EPSG:3035)</option>
+      <option value="epsg:2154">RGF93 / Lambert-93 (EPSG:2154)</option>
+      <!-- option value="epsg:31257">MGI Austria GK M28 (BMN - M28) (EPSG:31257)</option -->
+      <!-- option value="epsg:31258">MGI Austria GK M31 (BMN - M31) (EPSG:31258)</option -->
+      <!-- option value="epsg:31259">MGI Austria GK M34 (BMN - M34) (EPSG:31259)</option -->
+      <!-- option value="epsg:31287">MGI Austria Lambert (LCC/MGI) (EPSG:31287)</option -->
+      <!-- option value="epsg:32661">UPS North / WGS84 (EPSG:32661)</option -->
+      <!-- option value="epsg:32761">UPS South / WGS84 (EPSG:32761)</option -->
+      <option value="epsg:32601">UTM 01N / WGS84 (EPSG:32601)</option>
+      <option value="epsg:32602">UTM 02N / WGS84 (EPSG:32602)</option>
+      <option value="epsg:32603">UTM 03N / WGS84 (EPSG:32603)</option>
+      <option value="epsg:32604">UTM 04N / WGS84 (EPSG:32604)</option>
+      <option value="epsg:32605">UTM 05N / WGS84 (EPSG:32605)</option>
+      <option value="epsg:32606">UTM 06N / WGS84 (EPSG:32606)</option>
+      <option value="epsg:32607">UTM 07N / WGS84 (EPSG:32607)</option>
+      <option value="epsg:32608">UTM 08N / WGS84 (EPSG:32608)</option>
+      <option value="epsg:32609">UTM 09N / WGS84 (EPSG:32609)</option>
+      <option value="epsg:32610">UTM 10N / WGS84 (EPSG:32610)</option>
+      <option value="epsg:32611">UTM 11N / WGS84 (EPSG:32611)</option>
+      <option value="epsg:32612">UTM 12N / WGS84 (EPSG:32612)</option>
+      <option value="epsg:32613">UTM 13N / WGS84 (EPSG:32613)</option>
+      <option value="epsg:32614">UTM 14N / WGS84 (EPSG:32614)</option>
+      <option value="epsg:32615">UTM 15N / WGS84 (EPSG:32615)</option>
+      <option value="epsg:32616">UTM 16N / WGS84 (EPSG:32616)</option>
+      <option value="epsg:32617">UTM 17N / WGS84 (EPSG:32617)</option>
+      <option value="epsg:32618">UTM 18N / WGS84 (EPSG:32618)</option>
+      <option value="epsg:32619">UTM 19N / WGS84 (EPSG:32619)</option>
+      <option value="epsg:32620">UTM 20N / WGS84 (EPSG:32620)</option>
+      <option value="epsg:32621">UTM 21N / WGS84 (EPSG:32621)</option>
+      <option value="epsg:32622">UTM 22N / WGS84 (EPSG:32622)</option>
+      <option value="epsg:32623">UTM 23N / WGS84 (EPSG:32623)</option>
+      <option value="epsg:32624">UTM 24N / WGS84 (EPSG:32624)</option>
+      <option value="epsg:32625">UTM 25N / WGS84 (EPSG:32625)</option>
+      <option value="epsg:32626">UTM 26N / WGS84 (EPSG:32626)</option>
+      <option value="epsg:32627">UTM 27N / WGS84 (EPSG:32627)</option>
+      <option value="epsg:32628">UTM 28N / WGS84 (EPSG:32628)</option>
+      <option value="epsg:32629">UTM 29N / WGS84 (EPSG:32629)</option>
+      <option value="epsg:32630">UTM 30N / WGS84 (EPSG:32630)</option>
+      <option value="epsg:32631" selected>UTM 31N / WGS84 (EPSG:32631)</option>
+      <option value="epsg:32632">UTM 32N / WGS84 (EPSG:32632)</option>
+      <option value="epsg:32633">UTM 33N / WGS84 (EPSG:32633)</option>
+      <option value="epsg:32634">UTM 34N / WGS84 (EPSG:32634)</option>
+      <option value="epsg:32635">UTM 35N / WGS84 (EPSG:32635)</option>
+      <option value="epsg:32636">UTM 36N / WGS84 (EPSG:32636)</option>
+      <option value="epsg:32637">UTM 37N / WGS84 (EPSG:32637)</option>
+      <option value="epsg:32638">UTM 38N / WGS84 (EPSG:32638)</option>
+      <option value="epsg:32639">UTM 39N / WGS84 (EPSG:32639)</option>
+      <option value="epsg:32640">UTM 40N / WGS84 (EPSG:32640)</option>
+      <option value="epsg:32641">UTM 41N / WGS84 (EPSG:32641)</option>
+      <option value="epsg:32642">UTM 42N / WGS84 (EPSG:32642)</option>
+      <option value="epsg:32643">UTM 43N / WGS84 (EPSG:32643)</option>
+      <option value="epsg:32644">UTM 44N / WGS84 (EPSG:32644)</option>
+      <option value="epsg:32645">UTM 45N / WGS84 (EPSG:32645)</option>
+      <option value="epsg:32646">UTM 46N / WGS84 (EPSG:32646)</option>
+      <option value="epsg:32647">UTM 47N / WGS84 (EPSG:32647)</option>
+      <option value="epsg:32648">UTM 48N / WGS84 (EPSG:32648)</option>
+      <option value="epsg:32649">UTM 49N / WGS84 (EPSG:32649)</option>
+      <option value="epsg:32650">UTM 50N / WGS84 (EPSG:32650)</option>
+      <option value="epsg:32651">UTM 51N / WGS84 (EPSG:32651)</option>
+      <option value="epsg:32652">UTM 52N / WGS84 (EPSG:32652)</option>
+      <option value="epsg:32653">UTM 53N / WGS84 (EPSG:32653)</option>
+      <option value="epsg:32654">UTM 54N / WGS84 (EPSG:32654)</option>
+      <option value="epsg:32655">UTM 55N / WGS84 (EPSG:32655)</option>
+      <option value="epsg:32656">UTM 56N / WGS84 (EPSG:32656)</option>
+      <option value="epsg:32657">UTM 57N / WGS84 (EPSG:32657)</option>
+      <option value="epsg:32658">UTM 58N / WGS84 (EPSG:32658)</option>
+      <option value="epsg:32659">UTM 59N / WGS84 (EPSG:32659)</option>
+      <option value="epsg:32660">UTM 60N / WGS84 (EPSG:32660)</option>
+      <option value="epsg:32700">UTM 00S / WGS84 (EPSG:32700)</option>
+      <option value="epsg:32701">UTM 01S / WGS84 (EPSG:32701)</option>
+      <option value="epsg:32702">UTM 02S / WGS84 (EPSG:32702)</option>
+      <option value="epsg:32703">UTM 03S / WGS84 (EPSG:32703)</option>
+      <option value="epsg:32704">UTM 04S / WGS84 (EPSG:32704)</option>
+      <option value="epsg:32705">UTM 05S / WGS84 (EPSG:32705)</option>
+      <option value="epsg:32706">UTM 06S / WGS84 (EPSG:32706)</option>
+      <option value="epsg:32707">UTM 07S / WGS84 (EPSG:32707)</option>
+      <option value="epsg:32708">UTM 08S / WGS84 (EPSG:32708)</option>
+      <option value="epsg:32709">UTM 09S / WGS84 (EPSG:32709)</option>
+      <option value="epsg:32710">UTM 10S / WGS84 (EPSG:32710)</option>
+      <option value="epsg:32711">UTM 11S / WGS84 (EPSG:32711)</option>
+      <option value="epsg:32712">UTM 12S / WGS84 (EPSG:32712)</option>
+      <option value="epsg:32713">UTM 13S / WGS84 (EPSG:32713)</option>
+      <option value="epsg:32714">UTM 14S / WGS84 (EPSG:32714)</option>
+      <option value="epsg:32715">UTM 15S / WGS84 (EPSG:32715)</option>
+      <option value="epsg:32716">UTM 16S / WGS84 (EPSG:32716)</option>
+      <option value="epsg:32717">UTM 17S / WGS84 (EPSG:32717)</option>
+      <option value="epsg:32718">UTM 18S / WGS84 (EPSG:32718)</option>
+      <option value="epsg:32719">UTM 19S / WGS84 (EPSG:32719)</option>
+      <option value="epsg:32720">UTM 20S / WGS84 (EPSG:32720)</option>
+      <option value="epsg:32721">UTM 21S / WGS84 (EPSG:32721)</option>
+      <option value="epsg:32722">UTM 22S / WGS84 (EPSG:32722)</option>
+      <option value="epsg:32723">UTM 23S / WGS84 (EPSG:32723)</option>
+      <option value="epsg:32724">UTM 24S / WGS84 (EPSG:32724)</option>
+      <option value="epsg:32725">UTM 25S / WGS84 (EPSG:32725)</option>
+      <option value="epsg:32726">UTM 26S / WGS84 (EPSG:32726)</option>
+      <option value="epsg:32727">UTM 27S / WGS84 (EPSG:32727)</option>
+      <option value="epsg:32728">UTM 28S / WGS84 (EPSG:32728)</option>
+      <option value="epsg:32729">UTM 29S / WGS84 (EPSG:32729)</option>
+      <option value="epsg:32730">UTM 30S / WGS84 (EPSG:32730)</option>
+      <option value="epsg:32731">UTM 31S / WGS84 (EPSG:32731)</option>
+      <option value="epsg:32732">UTM 32S / WGS84 (EPSG:32732)</option>
+      <option value="epsg:32733">UTM 33S / WGS84 (EPSG:32733)</option>
+      <option value="epsg:32734">UTM 34S / WGS84 (EPSG:32734)</option>
+      <option value="epsg:32735">UTM 35S / WGS84 (EPSG:32735)</option>
+      <option value="epsg:32736">UTM 36S / WGS84 (EPSG:32736)</option>
+      <option value="epsg:32737">UTM 37S / WGS84 (EPSG:32737)</option>
+      <option value="epsg:32738">UTM 38S / WGS84 (EPSG:32738)</option>
+      <option value="epsg:32739">UTM 39S / WGS84 (EPSG:32739)</option>
+      <option value="epsg:32740">UTM 40S / WGS84 (EPSG:32740)</option>
+      <option value="epsg:32741">UTM 41S / WGS84 (EPSG:32741)</option>
+      <option value="epsg:32742">UTM 42S / WGS84 (EPSG:32742)</option>
+      <option value="epsg:32743">UTM 43S / WGS84 (EPSG:32743)</option>
+      <option value="epsg:32744">UTM 44S / WGS84 (EPSG:32744)</option>
+      <option value="epsg:32745">UTM 45S / WGS84 (EPSG:32745)</option>
+      <option value="epsg:32746">UTM 46S / WGS84 (EPSG:32746)</option>
+      <option value="epsg:32747">UTM 47S / WGS84 (EPSG:32747)</option>
+      <option value="epsg:32748">UTM 48S / WGS84 (EPSG:32748)</option>
+      <option value="epsg:32749">UTM 49S / WGS84 (EPSG:32749)</option>
+      <option value="epsg:32750">UTM 50S / WGS84 (EPSG:32750)</option>
+      <option value="epsg:32751">UTM 51S / WGS84 (EPSG:32751)</option>
+      <option value="epsg:32752">UTM 52S / WGS84 (EPSG:32752)</option>
+      <option value="epsg:32753">UTM 53S / WGS84 (EPSG:32753)</option>
+      <option value="epsg:32754">UTM 54S / WGS84 (EPSG:32754)</option>
+      <option value="epsg:32755">UTM 55S / WGS84 (EPSG:32755)</option>
+      <option value="epsg:32756">UTM 56S / WGS84 (EPSG:32756)</option>
+      <option value="epsg:32757">UTM 57S / WGS84 (EPSG:32757)</option>
+      <option value="epsg:32758">UTM 58S / WGS84 (EPSG:32758)</option>
+      <option value="epsg:32759">UTM 59S / WGS84 (EPSG:32759)</option>
+      <option value="epsg:32760">UTM 60S / WGS84 (EPSG:32760)</option>
+    </select>
+    &nbsp;&nbsp;
+  </p>
+  <p>
+    <button class="btn btn-primary" id="btn-q-improve" style="float:right;margin-left:1ex;"><i class="icon-white icon-download-alt" title="Orthorectification."></i>Improve Quality</button>
+    <button class="btn btn-primary" id="btn-q-assess" style="float:right;"><i class="icon-white icon-download-alt"></i>Assess Quality</button>
+    <button type="button" class="btn btn-default" id="btn-refresh-dq-list" title="Refresh the list of the matching datasets (e.g., after modified layer selection)."><i class="fa fa-fw fa-refresh"></i> Refresh</button>
+    <button type="button" class="btn btn-default" id="btn-modify-dq-selection" title="Return to the time and area specification."><i class="fa fa-fw fa-edit"></i> Modify</button>
+  </p>
 </div>

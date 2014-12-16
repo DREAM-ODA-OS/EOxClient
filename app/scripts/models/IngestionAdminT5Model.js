@@ -16,10 +16,11 @@
                 config_src.ingestionEngineT5.listScenario;
             var IngestionAdminT5Model = Backbone.Model.extend(
                 {
+                    failure: false,
                     url: url_src,
                     ToI:{},          // Time of Interest
                     AoI:[],          // Area of Interest
-                    scenarios: []    // Defined Scenarios
+                    scenarios: null  // Defined Scenarios
                 }
             );
 

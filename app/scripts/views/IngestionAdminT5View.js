@@ -61,6 +61,22 @@
                 is_showing     : false,
                 change_pending : false,
 
+                fetch_model: function(){
+                    var that = this;
+                    this.model.fetch({
+                        suppressErrors: that.model.get('failure'),
+                        error: function() {
+                                that.model.set({
+                                    'failure': true,
+                                    'scenarios': null
+                                });
+                            },
+                        success: function() {
+                                that.model.set({'failure': false});
+                            }
+                    });
+                },
+
                 get_scenario_st : function(that, sc_id, ncn_id) {
                     var scenarios = that.model.get('scenarios');
                     for (var i=0; i<scenarios.length; i++)
@@ -151,7 +167,11 @@
                             alertMessage = "No ingestion scenario defined. Create a new one by clicking on the Create Scenario button below.";
                         }
                     } else {
-                        alertMessage = "Failed to fetch scenarios from the Ingestion Engine!";
+                        if ( that.model.get('failure') ) {
+                            alertMessage = "Failed to fetch scenarios from the Ingestion Engine!";
+                        } else {
+                            alertMessage = "Fetching the scenarios ...";
+                        }
                     }
 
                     that.$('#ingestion-alert').html(alertMessage);
@@ -188,7 +208,7 @@
                     }
 
                     if (op != 'Stop' && ss.st_isav==0) {
-                        alert('Scenario '+ncn_id+'is locked - operation in progress');
+                        alert('Scenario '+ncn_id+' is locked - operation in progress');
                         return;
                     }
 
@@ -219,10 +239,9 @@
                                         console.log('IngAdmT5: '+ncn_id+' ajax ' +op+ ' ' + errorThrown);
                                 }, this));
 
-                        var idel;
-                        idel = setInterval(_.bind(function() {
+                        var idel = setInterval(_.bind(function() {
                                     if (this.change_pending) {
-                                        this.model.fetch();
+                                        this.fetch_model();
                                     } else {
                                         clearInterval(idel);
                                     }
@@ -252,7 +271,7 @@
 
                     this.$('#ingestion-alert').html("Loading scenarios from the Ingestion Engine ...");
 
-                    this.updater.i = setInterval(_.bind(function() { this.model.fetch(); }, this ), 2250);
+                    this.updater.i = setInterval(_.bind(function() { this.fetch_model(); }, this ), 2250);
 
                     this.$el.draggable(
                     { 
@@ -378,10 +397,10 @@
 
                 onTest: function() 
                 {
-                    this.model.fetch();
+                    this.fetch_model();
 
                     this.updater.i = setInterval(_.bind(function() {
-                                this.model.fetch();
+                                this.fetch_model();
                             },
                             this ),
                         1250);

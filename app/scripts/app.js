@@ -72,6 +72,9 @@
                 // Ingestion Engine options
 				globals.objects.add('ingestionEngineT5', config.ingestionEngineT5);
 
+                // Quality configuration
+				globals.objects.add('orthoQualityConfig', config.orthoQualityConfig);
+
 				// Application regions are loaded and added to the Marionette Application
 				_.each(config.regions, function(region) {
 					var obj ={};

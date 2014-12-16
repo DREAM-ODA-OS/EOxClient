@@ -14,6 +14,10 @@
     "showLog"         : "odashowlog/"
   },
 
+  "orthoQualityConfig": {
+     "qtmpUrl" : null
+  },
+
   "mapConfig": {
     "module": "views/MapView",
     "model": "models/MapModel",
@@ -166,7 +170,7 @@
       {
         "name" : "Quality",
         "icon" : "fa-eye",
-        "eventToRaise" : "dialog:toggle:orthoQuality"
+        "eventToRaise" : "dialog:toggle:orthoQualitySelection"
       },
       {
         "name" : "Feature Info",
@@ -210,6 +214,8 @@
     "views/TimeSliderView",
     "views/ToolSelectionView",
     "views/ToolItemView",
+    "views/OrthoQualitySelectionView",
+    "views/OrthoQualityView",
     "views/DownloadView",
     "views/DownloadSelectionView"
   ],

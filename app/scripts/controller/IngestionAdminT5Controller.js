@@ -50,16 +50,6 @@
 
             initialize: function(options) {
 
-                // model initialization:
-                this.model.fetch({
-                    error:function(m,r,o){
-                        console.error("Failed to fetch the ingestion scenarios!");
-                        console.error(m);
-                        console.error(r);
-                        console.error(o);
-                    }
-                });
-
                 // register events the component is listenning to:
                 this.listenTo(Communicator.mediator, "dialog:open:ingestionAdminT5", this.onIngestionAdminOpen);
                 this.listenTo(Communicator.mediator, "dialog:close:ingestionAdminT5", this.onIngestionAdminClose);
