@@ -87,9 +87,14 @@ define(['backbone',
 					this.listenTo(Communicator.mediator, 'map:marker:set', this.setMarker);
 					this.listenTo(Communicator.mediator, 'map:marker:clearAll', this.clearMarkers);
 					this.listenTo(Communicator.mediator, 'map:layer:save', this.getLayerURL);
+					this.listenTo(Communicator.mediator, 'map:preview:set', this.onPreviewLayerCreate);
+					this.listenTo(Communicator.mediator, 'map:preview:clear', this.onPreviewLayerRemove);
 
 					Communicator.reqres.setHandler('map:get:extent', _.bind(this.onGetMapExtent, this));
 					Communicator.reqres.setHandler('get:selection:json', _.bind(this.onGetGeoJSON, this));
+
+                    // preview layer - set later by the callback
+                    this.previewLayer = null;
 
 					// Add layers for different selection methods
 					this.vectorLayer = new OpenLayers.Layer.Vector("Vector Layer");
@@ -627,13 +632,50 @@ define(['backbone',
 
 	            onSetExtent: function(bbox) {
 	            	this.map.zoomToExtent(bbox);
-
 	            },
 
 				onGetGeoJSON: function () {
 					return this.geojson.write(this.vectorLayer.features, true);
-				}
+				},
+
+                onPreviewLayerCreate: function(url, layers, params){
+
+                    // remove the previous layer if exists
+                    this.onPreviewLayerRemove()
+
+                    // create new layer with the defualt options
+                    this.previewLayer = new OpenLayers.Layer.WMS(
+                        "__preview_WMS_layer_",
+                        url,
+                        {
+                            layers: layers,
+                            transparent: "true",
+                            format: "image/png"
+                        },
+                        {
+                            isBaseLayer: false
+                        }
+                    );
+
+                    // merge any possible additional user parameters
+                    if(typeof params !== 'undefined'){
+                        this.previewLayer.mergeNewParams(params);
+                    }
+
+                    // add the layer to the map
+                    this.map.addLayer(this.previewLayer);
+                },
+
+                onPreviewLayerRemove: function(){
+                    if (this.previewLayer){
+                        // unlink and reset the existing layer
+                        this.map.removeLayer(this.previewLayer);
+                        this.previewLayer = null;
+                    }
+                }
+
 			});
+
 			return {"MapView":MapView};
 	});
 
