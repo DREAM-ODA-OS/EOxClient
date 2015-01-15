@@ -58,6 +58,16 @@
  		        var $openserachList = this.$("#list-opensearch");
 		        $openserachList.children().remove();
 
+                var aoi = this.model.get("AoI")
+                if (aoi) {
+                    $("#txt-minx").val(aoi.left);
+                    $("#txt-maxx").val(aoi.right);
+                    $("#txt-miny").val(aoi.bottom);
+                    $("#txt-maxy").val(aoi.top);
+					this.$("#btn-opensearch").removeAttr("disabled");
+                } else {
+				    this.$("#btn-opensearch").attr("disabled", "disabled");
+                }
 
 		    	this.$('#div-date-begin input[type="text"]').datepicker({autoclose: true, format: "yyyy-mm-dd", keyboardNavigation: false});
 		    	this.$('#div-date-begin input[type="text"]').datepicker('update', this.model.get('ToI').start);
@@ -67,7 +77,6 @@
 		    	this.$('#div-date-end input[type="text"]').datepicker('update', this.model.get('ToI').end);
 				this.$('#div-date-end input[type="text"]').datepicker('setDate', this.model.get('ToI').end);
 				// disable all button's
-				this.$("#btn-opensearch").attr("disabled", "disabled");
 				this.$("#btn-savescenario").attr("disabled", "disabled");
 
 				$(document).on('touch click', '#div-date-begin .input-group-addon', function(e){
@@ -155,7 +164,7 @@ htmlTemplate
 				// get parameters
 				var startDatestr = getISODateTimeString(this.model.get('ToI').start);
 				var endDatestr = getISODateTimeString(this.model.get('ToI').end);
-				var bbox = this.model.get("AoI").getBounds();
+				var bbox = this.model.get("AoI");
 				var AoIStr = String(bbox.left.toFixed(3))+','+String(bbox.bottom.toFixed(3))+','+String(bbox.right.toFixed(3))+','+String(bbox.top.toFixed(3));
 				// set url parameters
 				var params = { bbox:AoIStr, startdate:startDatestr, endDate:endDatestr, maxrecord:50 };

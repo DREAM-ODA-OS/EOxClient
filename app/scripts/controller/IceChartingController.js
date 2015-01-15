@@ -34,6 +34,7 @@
                     this.listenTo(Communicator.mediator, "map:layer:change", this.onChangeLayer);
                     this.listenTo(Communicator.mediator, 'time:change', this.onTimeChange);
                     this.listenTo(Communicator.mediator, "selection:changed", this.onSelectionChange);
+                    this.listenTo(Communicator.mediator, "selection:bbox:changed", this.onBBoxChange);
                     this.listenTo(Communicator.mediator, "dialog:open:download", this.onDownloadToolOpen);
                     this.listenTo(Communicator.mediator, "dialog:open:iceCharting", this.onIceChartingOpen);
             
@@ -68,11 +69,25 @@
                 onSelectionChange: function(selection) {
                     if (selection != null) {
                       if(selection.CLASS_NAME == "OpenLayers.Geometry.Polygon"){
-                        this.model.set('AoI', selection);
+                        this.model.set('AoI', {
+                            left: selection.bounds.left,
+                            right: selection.bounds.right,
+                            bottom: selection.bounds.bottom,
+                            top: selection.bounds.top,
+                        });
                       }
                     }else{
                       this.model.set('AoI', null);
                     }
+                },
+
+                onBBoxChange: function(bbox) {
+                    this.model.set('AoI', {
+                        left: bbox.left,
+                        right: bbox.right,
+                        bottom: bbox.bottom,
+                        top: bbox.top,
+                    });
                 },
     
     
