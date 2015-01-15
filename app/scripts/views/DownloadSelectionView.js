@@ -51,6 +51,9 @@
                     $("#txt-maxx").val(aoi.right);
                     $("#txt-miny").val(aoi.bottom);
                     $("#txt-maxy").val(aoi.top);
+                    this.$("#btn-download").removeAttr("disabled");
+                } else {
+                    this.$("#btn-download").attr("disabled", "disabled");
                 }
 
 		    	this.$('#div-date-begin input[type="text"]').datepicker({autoclose: true, format: "dd/mm/yyyy", keyboardNavigation: false});
@@ -83,6 +86,7 @@
 				$("#txt-maxx").val("");
 				$("#txt-miny").val("");
 				$("#txt-maxy").val("");
+                this.$("#btn-download").attr("disabled", "disabled");
 			},
 
 			onDownloadClick: function () {
@@ -109,6 +113,9 @@
 					$("#txt-maxx").val(obj.bounds.right);
 					$("#txt-miny").val(obj.bounds.bottom);
 					$("#txt-maxy").val(obj.bounds.top);
+                    this.$("#btn-download").removeAttr("disabled");
+                } else {
+                    this.$("#btn-download").attr("disabled", "disabled");
 				}
 				
 			},
@@ -122,11 +129,14 @@
 					top: parseFloat($("#txt-maxy").val())
 				};
 
+                this.$("#btn-download").attr("disabled", "disabled");
+
 				if(!isNaN(values.left) && !isNaN(values.right) &&
 					!isNaN(values.bottom) && !isNaN(values.top) ) {
 					
 					if ( !(values.left > values.right || values.bottom > values.top)){
 						Communicator.mediator.trigger('selection:bbox:changed',values);
+                        this.$("#btn-download").removeAttr("disabled");
 					}
 				}
 			},
