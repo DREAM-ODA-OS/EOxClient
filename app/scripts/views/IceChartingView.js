@@ -58,16 +58,6 @@
  		        var $openserachList = this.$("#list-opensearch");
 		        $openserachList.children().remove();
 
-                var aoi = this.model.get("AoI")
-                if (aoi) {
-                    $("#txt-minx").val(aoi.left);
-                    $("#txt-maxx").val(aoi.right);
-                    $("#txt-miny").val(aoi.bottom);
-                    $("#txt-maxy").val(aoi.top);
-					this.$("#btn-opensearch").removeAttr("disabled");
-                } else {
-				    this.$("#btn-opensearch").attr("disabled", "disabled");
-                }
 
 		    	this.$('#div-date-begin input[type="text"]').datepicker({autoclose: true, format: "yyyy-mm-dd", keyboardNavigation: false});
 		    	this.$('#div-date-begin input[type="text"]').datepicker('update', this.model.get('ToI').start);
@@ -77,6 +67,7 @@
 		    	this.$('#div-date-end input[type="text"]').datepicker('update', this.model.get('ToI').end);
 				this.$('#div-date-end input[type="text"]').datepicker('setDate', this.model.get('ToI').end);
 				// disable all button's
+				this.$("#btn-opensearch").attr("disabled", "disabled");
 				this.$("#btn-savescenario").attr("disabled", "disabled");
 
 				$(document).on('touch click', '#div-date-begin .input-group-addon', function(e){
@@ -115,9 +106,10 @@ htmlTemplate
 			onSavescenarioClick: function () {
 				// proxy
 				// save scenario, same url as OpenSearch
+				//var url = ' http://dream-nlr.nlr.nl/scenario/manage?request=newOpenSearchScenario&q='+opensearchKeywords+'&'+query_args;
 				var url = 'scenario/manage?request=newOpenSearchScenario&q='+opensearchKeywords+'&'+query_args;
 				// test url
-				//var url = 'scenario/manage?request=newOpenSearchScenario&bbox=48.397,42.590,53.770,46.567&startdate=2010-01-10T00:00:00&endDate=2011-01-10T00:00:00&maxrecord=10&subject=RRS'
+				//var url = 'scenario/manage?request=newOpenSearchScenario&bbox=49.2584,39.3913,51.8072,42.1379&startdate=2009-02-05T00:00:00&endDate=2009-02-06T00:00:00&maxrecord=10&subject=ASA_IMM_1P'
 				
 				function getJsonData() {
 					return $.ajax({
@@ -129,7 +121,6 @@ htmlTemplate
 
 
 				function handleJsonData(data , textStatus, jqXHR ) {
-					
 					var obj = $.parseJSON( JSON.stringify(data) ); 
 					// status bar response example from request: {"status":0,"ncn_id":"scid17"}
 					if (obj.status == 0){
@@ -145,6 +136,9 @@ htmlTemplate
 			},
 
 			onOpensearchClick: function () {
+				// clear preview Map
+				Communicator.mediator.trigger("map:preview:clear");
+
 				// disable savescenario
 				this.$("#btn-savescenario").attr("disabled", "disabled");
 
@@ -155,7 +149,7 @@ htmlTemplate
 				var selectionopensearch = $("#select-opensearch").val();
 				// keywords for searching
 				opensearchKeywords = $("#txt-opensearchkeywords").val();
-				if (opensearchKeywords.length == 0) { opensearchKeywords = 'MERIS+ASAR'; }
+				if (opensearchKeywords.length == 0) { opensearchKeywords = 'MER+ASA'; }
 				// add list to dialoag
 				var $openserachList = root.$("#list-opensearch");
 				// remove item(s) out list
@@ -164,10 +158,12 @@ htmlTemplate
 				// get parameters
 				var startDatestr = getISODateTimeString(this.model.get('ToI').start);
 				var endDatestr = getISODateTimeString(this.model.get('ToI').end);
+				//var bbox = this.model.get("AoI").getBounds();
 				var bbox = this.model.get("AoI");
-				var AoIStr = String(bbox.left.toFixed(3))+','+String(bbox.bottom.toFixed(3))+','+String(bbox.right.toFixed(3))+','+String(bbox.top.toFixed(3));
+	  			var AoIStr = String(bbox.left.toFixed(3))+','+String(bbox.bottom.toFixed(3))+','+String(bbox.right.toFixed(3))+','+String(bbox.top.toFixed(3));
 				// set url parameters
 				var params = { bbox:AoIStr, startdate:startDatestr, endDate:endDatestr, maxrecord:50 };
+			
 
 				// FEDEO search?
 				if (parseInt(selectionopensearch) == 1){
@@ -175,11 +171,11 @@ htmlTemplate
 				} else if (parseInt(selectionopensearch) == 2){
 					params.subject = "ASA_IMM_1P";
 				}
-				query_args = jQuery.param( params );
+				var query_args = jQuery.param( params );
 
 				// proxy
 				var url = 'opensearch/opensearch?q='+opensearchKeywords+'&'+query_args;
-			
+
 				function getData() {
 					return $.ajax({
 						url : url,
@@ -190,41 +186,69 @@ htmlTemplate
 				
 
 				function handleData(data , textStatus, jqXHR ) {
-
+					
 					// get number of results					
 					var txtNumberResults = $(data).find("os\\:totalResults").text();
 					var intNumberResults = parseInt(txtNumberResults);
 
+					//alert(intNumberResults);
 					if ( intNumberResults > 0) {
+						// get value for selection 0= NLR, 1= FEDEO/MERIS and 2= FEDEO/ASAR 
+						// WCS browser vies only for NLR
+						var selectionopensearch = $("#select-opensearch").val();
+
 						// init object
-						var jsonObj = [];
+						var xmlObj = [];
 
 						// do for all entry's
-						$(data).find('entry').each(function(){
+						$(data).find('entry').each(function(index, entry){
 							/* Parse the XML File */
 							var temp_obj = {};
-							temp_obj["coverageId"] = $(this).find('title').text();
-							var temp_data = $(this).find('dc\\:date').text();
+							temp_obj["coverageId"] = $(entry).find('title').text();
+							var temp_data = $(entry).find('dc\\:date').text();
+							//alert(temp_data);
 							var arr =  temp_data.split('/');
 							temp_obj["period"] = arr[0] +'\n'+arr[1];
-							jsonObj.push(temp_obj);
+							
+							if (selectionopensearch == 0) { 
+								// Parse WCS link 
+								var link = $(entry).find('summary xh\\:a');
+								var link_str = (link.prop('href'));
+					
+								if (link_str.length > 0) {
+									var basehref = link_str.substr(0, link_str.indexOf('?'));
+									var props = link_str.split('&');
+									var layername= "";
+		
+									_.each(props, function(p){
+										var a = p.split('=');
+										if (a[0].toLowerCase() === 'layers'){
+											layername=a[1];
+										}
+									});
+									Communicator.mediator.trigger("map:preview:set",basehref,layername);
+								}
+							}
+							
+							xmlObj.push(temp_obj);
 
 		 			   	});
 
-						if (jsonObj.length > 0){
+						//alert(xmlObj.length);
+						if (xmlObj.length > 0){
 							// display number of search results
 							$("#txt-opensearch").val("Number of results: "+(txtNumberResults));
 							// enable savescenario
 							root.$("#btn-savescenario").removeAttr("disabled");
 
 							// add entry's to list
-							for (var i = 0; i < jsonObj.length; i++) {
-								var $html = $(SelectIcechartListItemTmpl(jsonObj[i]));
+							for (var i = 0; i < xmlObj.length; i++) {
+								var $html = $(SelectIcechartListItemTmpl(xmlObj[i]));
 								$openserachList.append($html);
 								$html.find("i").popover({
 									trigger: "hover",
 									html: true,
-									content: IcechartInfoTmpl(jsonObj[i]),
+									content: IcechartInfoTmpl(xmlObj[i]),
 									title: "Information",
 									placement: "bottom"
 								});
@@ -241,6 +265,7 @@ htmlTemplate
 				getData().done(handleData);
 
 			},
+
 
 			onTimeChange: function (time) {
 		    	this.$('#div-date-begin input[type="text"]').datepicker('update', this.model.get('ToI').start);
