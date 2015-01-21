@@ -115,6 +115,9 @@
                 // toggle visibility of the IceCharting overlay
                 onIceChartingOpen: function (event)
                 {
+                    // clear the WMS preview
+                    Communicator.mediator.trigger("map:preview:clear");
+
                     if ( _.isUndefined(this.view.isClosed) || this.view.isClosed ) 
                     {  
                         App.viewContent.show(this.view);
