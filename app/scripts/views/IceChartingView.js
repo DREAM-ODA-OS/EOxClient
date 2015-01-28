@@ -252,7 +252,7 @@
 					});
 				}
 
-				var query_args = jQuery.param( params );
+				query_args = jQuery.param( params );
 				var url = base_url+'opensearch/opensearch?q='+opensearchKeywords+'&'+query_args;
 
 				// get data from OpenSearch server NLR
